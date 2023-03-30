@@ -1,0 +1,13 @@
+%YAML 1.1
+---
+Server: 'http://localhost:3000'
+ApiKey: '3877cb9c327b35df73a6ba7e7b914e31cc19d953'
+Queue: 1
+Rules: 
+  - 
+    Filter: 
+      Subject: 'Example Subject'
+    Action: 
+      Notes: 'Successfully added note!'
+    Function: 'Invoke-ExampleFunction'
+...

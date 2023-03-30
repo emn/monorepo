@@ -1,0 +1,10 @@
+A PowerShell script that automatically triages issues in Redmine.
+
+Rules for handling Issues are defined in a YAML file. Each Rule consists of a Filter,
+an Action, and optionally a Function. Issues assigned to a given ID are pulled from the
+given Redmine server and iterated over. Each iteration checks the Issue against the list
+of Rules. If the Issue matches one of the Rules' Filter, that Rule's Action is applied to
+the Issue. If a Function is present, the corresponding PowerShell function is executed.
+
+Internal helper functions are stored in Functions/Private.
+Functions to be invoked by Rules are stored in Functions/Public. A template is available.
