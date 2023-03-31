@@ -1,3 +1,7 @@
+#An API wrapper for Redmine in PowerShell.
+#Forked from https://github.com/hamletmun/PSRedmine and customised for my own needs.
+#Designed to be used by other PowerShell scripts, not interactively.
+
 Add-Type -TypeDefinition @'
 public enum ResourceType {
     project,
