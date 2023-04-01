@@ -34,7 +34,7 @@ bw-login() {
  export BW_SESSION
 }
 export -f pw
-export -f bwl
+export -f bw-login
 
 if [ -z "$SSH_AUTH_SOCK" ] ; then
   eval `ssh-agent -s`
