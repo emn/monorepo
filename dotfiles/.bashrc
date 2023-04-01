@@ -33,10 +33,10 @@ bw-login() {
  read BW_SESSION < <(bw login --raw)
  export BW_SESSION
 }
-gh-ssh() {
- eval "$(ssh-agent -s)"
- ssh-add ~/.ssh/github-auth
-}
 export -f pw
 export -f bwl
-export -f gh-ssh
+
+if [ -z "$SSH_AUTH_SOCK" ] ; then
+  eval `ssh-agent -s`
+  ssh-add ~/.ssh/github-auth
+fi
