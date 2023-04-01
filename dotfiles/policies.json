@@ -1,0 +1,11 @@
+{
+ "policies": {
+  "DisablePocket": true,
+  "DisplayBookmarksToolbar": false,
+  "DisplayMenuBar": false,
+  "NoDefaultBookmarks": true,
+  "SearchEngines": {
+   "Default": "startpage"
+  }
+ }
+}
