@@ -33,8 +33,13 @@ bw-login() {
  read BW_SESSION < <(bw login --raw)
  export BW_SESSION
 }
+fix-multitouch() {
+ sudo modprobe -r hid-multitouch
+ sudo modprobe hid-multitouch
+}
 export -f pw
 export -f bw-login
+export -f fix-multitouch
 
 if [ -z "$SSH_AUTH_SOCK" ] ; then
   eval `ssh-agent -s` > /dev/null
