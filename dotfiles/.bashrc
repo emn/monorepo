@@ -45,3 +45,4 @@ if [ -z "$SSH_AUTH_SOCK" ] ; then
   eval `ssh-agent -s` > /dev/null
   ssh-add -q ~/.ssh/github-auth
 fi
+eval "$(starship init bash)"
