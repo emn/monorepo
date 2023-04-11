@@ -1,0 +1,2 @@
+# Every 5 minutes, delete any log files that were last modified over an hour ago
+*/5 * * * * root find /var/log/remote/ -mmin +61 -type f -exec rm {} +

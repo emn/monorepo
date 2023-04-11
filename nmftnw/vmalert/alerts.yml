@@ -1,0 +1,11 @@
+groups:
+  - name: common
+    rules:
+    - alert: instanceIsDown
+      for: 1m
+      expr: up == 0
+      labels:
+        severity: critical
+      annotations:
+        summary: " instance:  is not up"
+        description: "Job   instance:  is not up for the last 1 minute"
