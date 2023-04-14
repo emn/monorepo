@@ -37,6 +37,7 @@ mkdir -p .ssh
 mkdir -p dev
 mkdir -p doc/notes
 mkdir -p opt
+sudo mkdir -p /usr/local/share/fonts/hanazono-mincho
 
 # BITWARDEN
 if ! hash bw 2>/dev/null; then
@@ -84,6 +85,12 @@ rm -rf ~/Desktop ~/Downloads ~/Templates ~/Public ~/Documents ~/Music ~/Pictures
 # DATE/TIME/LOCALE
 timedatectl set-timezone Europe/London
 localectl set-keymap gb
+
+# TYPEFACES
+sudo curl -L https://github.com/cjkvi/HanaMinAFDKO/releases/download/8.030/HanaMinA.otf -o /usr/local/share/fonts/hanazoko-mincho/HanaMinA.otf
+sudo curl -L https://github.com/cjkvi/HanaMinAFDKO/releases/download/8.030/HanaMinB.otf -o /usr/local/share/fonts/hanazoko-mincho/HanaMinB.otf
+sudo curl -L https://github.com/cjkvi/HanaMinAFDKO/releases/download/8.030/HanaMinC.otf -o /usr/local/share/fonts/hanazoko-mincho/HanaMinC.otf
+fc-cache
 
 # DEV
 curl -fssL https://starship.rs/install.sh | sh
