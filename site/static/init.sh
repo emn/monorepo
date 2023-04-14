@@ -96,3 +96,11 @@ fc-cache
 curl -fssL https://starship.rs/install.sh | sh
 systemctl --user enable --now podman.socket
 sudo ln -s /run/user/1000/podman/podman.sock /var/run/docker.sock
+
+# FINAL
+cat <<EOF
+Unavoidably manual steps:
+
+Install anki addons:
+  874215009
+EOF
