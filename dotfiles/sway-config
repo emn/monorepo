@@ -229,3 +229,15 @@ include '$(/usr/libexec/sway/layered-include "/usr/share/sway/config.d/*.conf" "
 
 
 default_border none
+
+
+# Screenshots:
+# Super+P: Current window
+# Super+Shift+p: Select area
+# Super+Alt+p Current output
+# Super+Ctrl+p Select a window
+
+bindsym Mod4+p exec grimshot save active
+bindsym Mod4+Shift+p exec grimshot save area
+bindsym Mod4+Mod1+p exec grimshot save output
+bindsym Mod4+Ctrl+p exec grimshot save window
