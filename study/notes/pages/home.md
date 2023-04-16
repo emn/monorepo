@@ -1,2 +1,4 @@
+- [[mathematics]]
 - [[programming]]
+- [[algorithms and data structures]]
 -

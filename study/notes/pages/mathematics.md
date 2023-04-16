@@ -1,0 +1,3 @@
+- [[math academy]]
+- [[how to solve it]]
+- [[mathematics for computer science]]
