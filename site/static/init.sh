@@ -14,6 +14,9 @@ set -xe
 # tmux
 # anki addons
 # custom toolbox image with foot,starship installed
+# browser addons
+#   tree-style tabs
+#   singlefile
 
 # UPDATE SYSTEM
 sudo rpm-ostree update
