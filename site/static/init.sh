@@ -17,6 +17,7 @@ set -xe
 # browser addons
 #   tree-style tabs
 #   singlefile
+#   leechblock
 
 # UPDATE SYSTEM
 sudo rpm-ostree update
@@ -75,6 +76,8 @@ ln -s $DOT/.bashrc ~/.bashrc
 rm -f ~/.var/app/io.gitlab.librewolf-community/.librewolf/librewolf.overrides.cfg
 # symlinking this file does not work
 cp $DOT/librewolf.overrides.cfg ~/.var/app/io.gitlab.librewolf-community/.librewolf/librewolf.overrides.cfg
+mkdir -p .var/app/io.gitlab.librewolf-community/.librewolf/bdtfbymv.default-release/chrome
+cp $DOT/userChrome.css .var/app/io.gitlab.librewolf-community/.librewolf/bdtfbymv.default-release/chrome/userChrome.css
 #sudo cp policies.json 
 #browser.fullscreen.autohide
 
