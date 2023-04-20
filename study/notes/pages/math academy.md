@@ -208,6 +208,7 @@
 				- given a number, its additive inverse is the number we need to add to get zero
 			- equivalent expressions with fractions
 		- day 3
+		  collapsed:: true
 			- measures of segments
 			- evaluating rational number expressions without exponents
 			- the distributive law with three terms
@@ -284,15 +285,83 @@
 			- the power rule for exponents with algebraic expressions
 			- the cube root of a perfect cube with algebraic expressions
 			- adding and subtracting radicals
-			-
+		- day 4
+		  collapsed:: true
+			- further rules of absolute value
+			- the square root of a perfect square with domain restrictions
+			- the power of product rule with algebraic expressions
+			- factoring linear expressions
+			  collapsed:: true
+				- factoring is the opposite of distributing
+				- to factor, separate the GCF from each term and prepend it to parentheses around the remaining terms
+				- when terms are negative, the negative sign can also be factored out
+			- verifying solutions of linear equalities
+			- the power of quotient rule with algebraic expressions
+			- rationalizing denominators
+			  collapsed:: true
+				- when a fraction has a square root in the denominator, an equivalent fraction can be found without the square root by multiplying the numerator and denominator by the square root - this is rationalizing the denominator
+			- simplifying polynomials
+			  collapsed:: true
+				- to simplify a polynomial, combine like terms
+				- to write a polynomial in standard form, arrange the terms in descending order of the variable's exponent
+			- solving linear equations by trial and error
+			- evaluating rational number expressions with integer exponents
+		- day 5
+		  collapsed:: true
+			- solving one-step addition and subtraction equations
+			  collapsed:: true
+				- solving a linear equation involves isolating the variable on one side
+				- the addition principle tells us that adding/subtracting the same number on both sides of an equation does not change the solution
+			- solving problems using the four operations on rational numbers
+			- adding and subtracting polynomials
+			  collapsed:: true
+				- you can add two polynomials by collecting like terms and then simplifying
+				- to subtract, distribute the minus over one polynomial, then collect like terms and simplify
+			- solving one-step multiplication and division equations
+			  collapsed:: true
+				- the multiplication principle tells us that multiplying/dividing both sides of an equation does not change the solution
+				- to remove a negative sign from a variable, multiply both sides by -1
+			- evaluating numerical expressions containing radicals
+			  collapsed:: true
+				- the order of operations treats radicals as exponents, and expressions underneath radicals as parentheses
+			- interpreting linear expressions
+			- simplifying linear expressions when a group of terms is subtracted
+			  collapsed:: true
+				- the minus sign can be distributed over the group of terms in parentheses before simplifying
+			- adding and subtracting radical expressions
+			  collapsed:: true
+				- when dealing with sums or differences of square roots, we can combine any
+				   terms with the same algebraic expression under the square root symbol, similar to collecting like terms
+			- evaluating radical algebraic expressions
+			- simplifying linear expressions containing fractions
+			- solving one-step linear equalities
+			  collapsed:: true
+				- linear inequalities can be saved in the same fashion as linear equations
+				- however when multiplying/dividing both sides by a negative number, the inequality sign must be flipped
+			- solving two-step equations
+			  collapsed:: true
+				- always apply the addition principle first, and the multiplication principle second
+			- evaluating rational expressions
+			  collapsed:: true
+				- a rational expression is, roughly speaking, an algebraic expression that's in the form of a fraction, or contains fractions
+			- combining radical expressions using the product rule
+		- day 6
+			- simplifying rational expressions
+				-
+- done
+	- 20th feb 2022 x4 £300
+	- 18th apr 19th apr £600
+	-
 	- feedback
-		- diagnostic test needs tweaking because it incorrectly found me competent in some areas
-		- questions need to use less obvious numbers so that the calculation needs to be done every time. e.g. if the question uses a fraction or percentage like 1/4 or 50% the answer is often immediately obvious
-		- value proposition of spaced repetition is long term retention; this is at odds with a subscription-based business model (especially a $50pm one!)
-		- it feels like there must be some commonality between the rules governing fractions,mixed numbers,decimals and their conversion (could be wrong), the way they interact with negation etc but i'm having to memorise the individual rule in each instead which seems inefficient
+		- diagnostic test needs tweaking because it incorrectly found me competent in some areas and at the start i was presented with many questions which assumed knowledge i didn't have
+		- questions need to use less obvious numbers so that the calculation you are being taught needs to be done every time. e.g. if the question uses a fraction or percentage like 1/4 or 50% the answer is often immediately obvious
+		- it feels like there must be some commonality between the rules governing fractions,mixed numbers,decimals and their conversion (could be wrong), the way they interact with negation etc but mathacademy seems to want me to memorise the individual rule in each case instead which seems inefficient
 		- i wish there was a way to do a large number of drills quickly because the information is not sticking in my head with just 2 exercises
 		- some way to let the algorithm know that the answer you just gave was only a misclick might be useful, depending on how sensitive the algorithm is to the failure of individual questions
-		- the terminology used is different between lessons e.g. "counting number" is used in some places. just teach the technical terminology from the start so it is consistent  throughout all lessons. presumably even for those who aren't doing "foundations" and are moving through linearly, when you are reviewing older lessons the sudden reversal of terminology will be jarring
+		- the terminology used is different between lessons e.g. "counting number" is used in some places. just teach the technical terminology from the start so it is consistent  throughout all lessons. presumably even for those who aren't doing "foundations" and are moving through linearly, when you are reviewing older lessons the sudden reversal of terminology will be jarring.
 		- assuming the algorithm knows what things i keep failing on, i wish there was a button to press to do drills on just those things. eg i keep messing up arithmetic with fractions, negatives etc so i want to heavily drill that in particular
+		- halting lessons for "poor performance" is really frustrating because if i'm struggling with something that is precisely when i want to see and do more examples. shouldnt this be replaced with an option eg. "seems like you are struggling, want to continue now or try again later?"
+		- the tone and design of those "halting lessons" pages really needs to be tweaked; being presented with big red letters that basically say "you're a fucking idiot so we're docking xp" is demoralizing for me as a grown man, i can't imagine how a fourth grader would feel seeing that
+		- value proposition of spaced repetition is long term retention; this is at odds with a subscription-based business model (especially a $50pm one!). a lifetime option is one solution but that seems like it would be difficult to price. another option is a "review only" subscription for say $10pm with which you are unable to learn new material, but can log in to do your reviews
 - mathematical foundations ii
 - mathematical foundations iii
