@@ -33,7 +33,7 @@ enableRobotsTXT = true
     LanguageCode = "en-GB"
     contentDir = "content"
     [languages.en.params]
-      blogPath = "/blog" # Path to your blog section (used by RSS)
+      blogPath = "/journal" # Path to your blog section (used by RSS)
     #  madeWith = "Made with [Bear Cub](https://github.com/clente/hugo-bearcub)"
   #[languages.pt]
   #  title = "Bear Cub"
