@@ -215,7 +215,7 @@
 			- simplifying linear expressions using the distributive law
 			- another failure
 			  collapsed:: true
-				- ![doom](assets/doom2.png)
+				- ![doom](assets/doom2.png){:height 215, :width 496}
 			- splitting rational expressions into separate terms
 			- finding a total given a part and a percentage
 			- congruent segments
@@ -346,8 +346,83 @@
 				- a rational expression is, roughly speaking, an algebraic expression that's in the form of a fraction, or contains fractions
 			- combining radical expressions using the product rule
 		- day 6
+		  collapsed:: true
 			- simplifying rational expressions
+			- absolute value equations
+			- two variable linear equations and their solutions
+			  collapsed:: true
+				- in a linear equation there should be no powers on any of the variables
+				- a solution of a linear equation is an ordered pair that makes the equation true
+				- a linear equation in two variables will usually have an infinite number of solutions
+			- graphing linear equations
+			  collapsed:: true
+				- the graph of a linear equation will always be a straight line
+			- interior angles of triangles
+			  collapsed:: true
+				- the interior angle theorem states that the sum of the measures of the interior angles of any triangle is always equal to 180 degrees
+			- solving exponential equations with integer solutions
+			  collapsed:: true
+				- when a variable is contained within an exponent, that is an exponential equation
+			- horizontal and vertical lines
+			- calculating slopes of straight lines
+			  collapsed:: true
+				- the slope of a line is a measure of how steep it is, usually denoted with m
+				- measured by the amount a line rises vertically per unit run horizontally
+				- m = rise/run
+				- a line going upwards left to right is a positive slope, down from left to right is a negative slope
+				- if (x1,y1) and (x2,y2) are two points on a line, then m = y2 - y1 / x2 - x1
+				- the slope of a vertical line is undefined because x = 0
+			- interior angles of polygons
+			  collapsed:: true
+				- the sum of the interior angles of a polygon with n sides is 180*(n-2)
+				- to determine number of sides from the sum of interior angles, n/180+2
+			- combining the rule of exponents
+			- classifying triangles
+			  collapsed:: true
+				- classification by sides
+				  collapsed:: true
+					- equilateral triangles have three congruent sides
+					- isosceles triangles have two (called legs, the other side is the base)
+					- scalene triangles have none
+				- classification by angles
+				  collapsed:: true
+					- acute triangles have three angles < 90 degrees
+					- right angle triangles have one angle = 90 degrees
+					- obtuse triangles have one angle > 90 degrees
+				- longer sides are opposite to larger angles and vice versa
+			- exponential functions
+			  collapsed:: true
+				- the initial value of a function is the result you get when evaluating f(0)
+			- end behaviour of functions
+			  collapsed:: true
+				- the behaviour of a function as its input grows very positive/negative is called its end behaviour
+			- determining units in formulas
+			- introduction to systems of linear equations
 				-
+		- day 7
+			- assessment number 4
+			  collapsed:: true
+				- i seem to consistently get at least 2 questions wrong every assessment
+				- ![quiz4](assets/quiz4.png)
+			- further absolute value equations
+			- selecting units for rates of change
+			  collapsed:: true
+				- a rate of change measures how much something changes as we change something else
+				- eg to measure the rate that customer numbers increase each day:
+				    customers/day (customers per day)
+			- solving systems of two linear equations using elimination
+			- monomials, binomials, trinomials
+			- modelling exponential growth with functions
+			  collapsed:: true
+				- the formula for a growth factor is y = ab^t
+				- the formula for a growth rate is y = a(1+b)^t
+			- solving equations using the square root method
+			- multiplying binomials
+				- two binomials can be multiplied by multiplying each of the terms from one binomial by each of the terms of the other
+			- squaring binomials
+				- the formula to square a binomial is (a+b)^2 = a^2 + 2ab +b^2
+				- the sum of the square of the two terms plus twice their product
+				- the formula for a binomial involving subtraction is (a-b)^2 = a^2 - 2ab +b^2
 - done
 	- 20th feb 2022 x4 £300
 	- 18th apr 19th apr £600
