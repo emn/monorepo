@@ -1,5 +1,5 @@
 ---
-title: "first"
+title: "CompSci-Week0"
 date: 2023-04-15T18:12:25+01:00
 draft: false
 ---

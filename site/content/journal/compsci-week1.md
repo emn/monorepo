@@ -1,7 +1,7 @@
 ---
-title: "Compsci Week1"
+title: "CompSci Week1"
 date: 2023-04-23T12:14:11+01:00
-draft: true
+draft: false
 ---
 the first week of study has gone well.
 i like the approach of MathAcademy, although it is a little pricey (and $50pm is the early-bird beta pricing!).
