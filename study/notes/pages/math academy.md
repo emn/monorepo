@@ -398,8 +398,8 @@
 				- the behaviour of a function as its input grows very positive/negative is called its end behaviour
 			- determining units in formulas
 			- introduction to systems of linear equations
-				-
 		- day 7
+		  collapsed:: true
 			- assessment number 4
 			  collapsed:: true
 				- i seem to consistently get at least 2 questions wrong every assessment
@@ -430,12 +430,43 @@
 				- the GCF of two monomials is the largest expression which will divide both  with no remainder
 			- solving linear equations with fractional coefficients
 			- solving linear equations with decimal coefficients
+		- day 8
+		  collapsed:: true
+			- solving linear equations with variables on both sides
+			  collapsed:: true
+				- bring all variables to one side of the equation, and constants to the other side
+				- move to the side with the largest coefficient
+			- multiplying polynomials
+			- factoring perfect square trinomials
+			  collapsed:: true
+				- a perfect square trinomial is a three-term expression that is the result of squaring a binomial
+				- to factor a perfect square trinomial, relate it to the square of a sum/difference
+			- interpreting exponential growth
+			- evaluating algebraic radical expressions
+			- solving two-step inequalities
+			  collapsed:: true
+				- when multiplying/dividing an inequality by a negative, flip the sign
+			- solving equations with even exponents using the nth root method
+			- the isosceles triangle theorem
+			  collapsed:: true
+				- if a triangle is isosceles, the measure of the base angles must be the same
+				- if exactly two angles of a triangle have the same measure, it is isosceles
+			- equations with many solutions and no solutions
+			- the difference of squares formula
+			  collapsed:: true
+				- the product of the sum and the difference of two monomials is equal to the difference of their squares
+			- solving exponential growth problems
+			- factoring simple polynomials using greatest common factors
+			- factoring perfect square trionomials with leading coefficients
+			  collapsed:: true
+				- to factor a perfect square trinomial with a leading coefficient other than 1
+				   we use the square of sum formula a^2 + 2ab + b^2 = (a+b)^2
+			- modelling exponential decay with functions
+			- interpreting exponential decay
+			- congruent angles
 				-
-- done
-	- 20th feb 2022 x4 £300
-	- 18th apr 19th apr £600
-	-
 	- feedback
+	  collapsed:: true
 		- diagnostic test needs tweaking because it incorrectly found me competent in some areas and at the start i was presented with many questions which assumed knowledge i didn't have
 		- questions need to use less obvious numbers so that the calculation you are being taught needs to be done every time. e.g. if the question uses a fraction or percentage like 1/4 or 50% the answer is often immediately obvious
 		- it feels like there must be some commonality between the rules governing fractions,mixed numbers,decimals and their conversion (could be wrong), the way they interact with negation etc but mathacademy seems to want me to memorise the individual rule in each case instead which seems inefficient
