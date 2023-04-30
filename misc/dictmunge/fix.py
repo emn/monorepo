@@ -13,7 +13,7 @@ i = 0
 
 
 for e in d:
-  print("\n\n\n" + str(i))
+  #print("\n\n\n" + str(i))
   
   if e['ancient_form_svg_file_path']:
     p = Path(e['ancient_form_svg_file_path']).name
@@ -27,7 +27,7 @@ for e in d:
     if re.search('.\[.*?\]',e['component_analyses']):
       for r in replace:
         e['component_analyses'] = e['component_analyses'].replace(r,"<img src='"+r+".svg'/>")
-    print(e['component_analyses'])
+    #print(e['component_analyses'])
 
   if e['expert_data_file_path']:
     e['expert_data_file_path'] = re.sub('\[(essentials|expert)_data\]','',e['expert_data_file_path'])
@@ -35,7 +35,7 @@ for e in d:
     with open(e['expert_data_file_path']) as f:
       h = f.read()
     e['expert_data_file_path'] = re.sub('(\.\./(.{1,4}|key-concepts-kanji|references)/|\.\./\.\./\.\./(references|key-concepts(-kanji)?))','',h)
-    print(e['expert_data_file_path'])
+    #print(e['expert_data_file_path'])
 
   if e['form_explanation_file_path']:
     e['form_explanation_file_path'] = re.sub('\[(essentials|expert)_data\]','',e['form_explanation_file_path'])
@@ -48,7 +48,7 @@ for e in d:
     if re.search('.\[.*?\]',e['form_explanation_file_path']):
       for r in replace:
         e['form_explanation_file_path'] = e['form_explanation_file_path'].replace(r,"<img src='"+r+".svg'/>")
-    print(e['form_explanation_file_path'])
+    #print(e['form_explanation_file_path'])
 
   if e['meaning_tree_character_meanings']:
     e['meaning_tree_character_meanings'] = re.sub('(\.\././|\.\./\.\./\.\./(references|key-concepts(-kanji)?))','',e['meaning_tree_character_meanings'])
@@ -74,17 +74,44 @@ for e in d:
       h = f.read()
     h = h.split("\n",8)[8].replace('</body></html>','')
     e['system_data_file_path'] = re.sub('(\.\././|\.\./\.\./\.\./(references|key-concepts(-kanji)?))','',h)
-    print(e['system_data_file_path'])
+    #print(e['system_data_file_path'])
 
   i = i + 1
 
 df = pd.json_normalize(d)
-
 df.insert(0, 'kanji', df.pop('kanji'))
+df.columns = ['kanji','ancient-form','component-analyses','expert-data','form-explanation','character-meanings','component-meanings','kunyomi','kunyomi-vocab','level-info','onyomi','onyomi-vocab','svg','system-data']
+df = df.assign(tags='outlier')
 
-rtk = pd.read_csv("rtk.txt", usecols=[0,2,6], delimiter="\t", header=None, names=['kanji','keyword','number'], dtype={'number': 'Int32'})
-df['heisig_keyword'] = df['kanji'].map(rtk.set_index('kanji')['keyword'])
-df['heisig_number'] = df['kanji'].map(rtk.set_index('kanji')['number'])
-df = df.sort_values('heisig_number', ascending=True)
-df['heisig_number'] = df['heisig_number'].astype(object)
-df.to_csv('ortk.csv', header=False, index=False, encoding='utf-8', sep='|')
+with open('kjump.json') as f:
+    kjump = pd.json_normalize(json.load(f)['props']['pageProps']['importantCharacters'])
+kj = kjump[['key','readings.kanjidicMeaning','readings.kanjidicOn','readings.kanjidicKun']]
+kj.columns = ['kanji','kj_meaning','onyomi','kunyomi']
+kj = kj.assign(tags='kanjijump')
+kj = kj[(kj['kj_meaning'].notnull()) & ( (kj['onyomi'].notnull() | kj['kunyomi'].notnull()) )]
+dfi = df.set_index(['kanji']).index
+kji = kj.set_index(['kanji']).index
+mask = ~kji.isin(dfi)
+result = kj.loc[mask]
+df = df.merge(result, how='outer', on='kanji',suffixes=['_out','_kj'])
+df['kj_meaning'] = '<ol><li>' + df['kj_meaning'].str.join('</li><li>') + '</li></ol>'
+df['onyomi_kj'] = df['onyomi_kj'].str.join('、')
+df['kunyomi_kj'] = df['kunyomi_kj'].str.join('、')
+
+rtk = pd.read_csv("rtk.txt", usecols=[0,6], delimiter="\t", header=None, names=['kanji','index'], dtype={'index': 'Int32'})
+df = df.merge(rtk, how='left', on='kanji')
+df = df.sort_values('index', ascending=True)
+
+df['onyomi'] = df['onyomi_out'].fillna(df['onyomi_kj'])#.fillna(df['onyomi_rtk'])
+df['kunyomi'] = df['kunyomi_out'].fillna(df['kunyomi_kj'])#.fillna(df['kunyomi_rtk'])
+df['reading'] = df['onyomi'].fillna(df['kunyomi'])
+cols = ['character-meanings', 'component-meanings']
+df['meaning'] = df[cols].apply(lambda x: None if x.isnull().all() else ''.join(x.dropna()), axis=1)
+df['meaning'] = df['meaning'].fillna(df['kj_meaning'])
+cols = ['tags_out','tags_kj']#,'tags_rtk']
+df['tags'] = df[cols].apply(lambda x: None if x.isnull().all() else ' '.join(x.dropna()), axis=1)
+
+df.drop(columns=['index','kunyomi','kunyomi_out', 'kunyomi_kj', 'onyomi','onyomi_out', 'onyomi_kj', 'kunyomi-vocab','onyomi-vocab','character-meanings','component-meanings','kj_meaning','level-info','tags_out','tags_kj'], inplace=True)
+
+df = df[['kanji', 'reading', 'meaning', 'component-analyses', 'ancient-form', 'form-explanation', 'system-data', 'expert-data', 'svg', 'tags']]
+df.to_csv('ertk2.csv', header=False, index=False, encoding='utf-8', sep='|')

@@ -465,6 +465,113 @@
 			- interpreting exponential decay
 			- congruent angles
 				-
+		- day 9
+		  collapsed:: true
+			- solving equations with odd exponents using the nth root method
+			- factoring differences of squares
+			- adding and subtracting radical expressions
+		- day 10
+		  collapsed:: true
+			- first 100%
+			  collapsed:: true
+				- ![hope](/assets/hope.png)
+			- solving exponential decay problems
+			- unit conversions using base units of mass
+			- unit conversions using base units of length
+			- unit conversions using units of time
+			- representing solutions to inequalities on number lines
+			- factoring trinomials
+			  collapsed:: true
+				- when a trinomial is neither a perfect square nor a difference of squares, it can be factored by finding two factors of the constant term whos sum is the coefficient of the linear term
+			- converting units of area to smaller units
+			  collapsed:: true
+				- the conversion factor needs to be squared
+			- factoring trinomials using common factors
+			- simplifying linear expressions containing fractions
+			- solving linear equations by clearing a rational expression
+			- vertical angles
+			  collapsed:: true
+				- when two lines meet at a point, they create two pairs of opposite angles. the angles in each pair are called vertical angles
+				- vertical angles are always congruent
+			- modeling with linear equations
+			- expanding binomials using pascal's triangle
+			  collapsed:: true
+				- multiplying a binomial by itself n times is known as binomial expansion
+			- solving linear equations by using cross multiplication
+			- solving rational equations containing one fractional term
+			- solving rational equations by using cross multiplication
+			- solving problems with angles
+			- solving rational equations containing binomials using cross multiplication
+			- supplementary angles
+			  collapsed:: true
+				- two angle are supplementary if the sum of their measures is 180
+				- they can also be called a linear pair
+			- midpoints
+			- exterior angles of triangles
+			  collapsed:: true
+				- sum of the exterior angles of a triangle is 360
+			- perpendicular lines and bisectors
+			  collapsed:: true
+				- two intersecting lines are perpendicular if they form a right angle
+			- heights of triangles
+			- the segment addition postulate
+			  collapsed:: true
+				- three points are collinear if and only if the largest distance between two of them is equal to the sum of the other two distances
+			- solving rational equations using the flip method
+			- introduction to circles
+			- corresponding angles
+			  collapsed:: true
+				- a line that crosses two parallel lines is called a transversal
+				- corresponding pairs of angles are located in the same position as each 
+				  other relative to the parallel lines and on the same side of the 
+				  transversal
+			- solving two-variable equations
+			- arcs, segments and sectors of circles
+			-
+		- day 11
+		  collapsed:: true
+			- exterior angles of polygons
+			- solving linear equations with unknown coefficients
+			- complementary angles
+			  collapsed:: true
+				- complementary angles are two angles whose sum is 90
+				- complementary angles do not have to be adjacent
+			- equations of lines in slope-intercept form
+			  collapsed:: true
+				- the slope-intercept form of the equation of a line is y=mx+b where m is the slope and b is the y-intercept
+			- two-step unit conversions
+			- finding properties of lines given in intercept form
+			- factoring trinomials with leading coefficients
+			- solving systems of two linear equations using substitution
+			- visual representations of functions
+			  collapsed:: true
+				- a function is a rule where every input value is assigned precisely one output value
+			- further solving linear inequalities
+			- modeling with linear equations in two variables
+			- solving linear equations with unknown coefficients by factoring
+			- calculating the intersection of two lines
+			- equations of lines in point-slope form
+		- day 12
+		  collapsed:: true
+			- solving multivariable equations
+			  collapsed:: true
+				- when you solve and equation for only one variable, that is called making the variable the subject of the equation
+			- systems of equations with no solutions and infinitely many solutions
+			  collapsed:: true
+				- a system of equations is consistent if it has at least one solution, otherwise it is inconsistent
+				- when it has a single solution, it is consistent independent, otherwise it is consistent dependent
+			- compound AND inequalities
+			- equations of lines in standard form
+			- systems of linear equations with decimal coefficients
+			- the pythagorean theorem
+			- determining properties of lines given in standard form
+			- graphs of functions
+			- converting units of area into larger units
+			- the domain of a function
+			- the roots of a function
+			- piecewise functions
+		- day 13
+			-
 	- feedback
 	  collapsed:: true
 		- diagnostic test needs tweaking because it incorrectly found me competent in some areas and at the start i was presented with many questions which assumed knowledge i didn't have
