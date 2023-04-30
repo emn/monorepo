@@ -528,6 +528,50 @@
 			- solving two-variable equations
 			- arcs, segments and sectors of circles
 			-
+		- day 11
+		  collapsed:: true
+			- exterior angles of polygons
+			- solving linear equations with unknown coefficients
+			- complementary angles
+			  collapsed:: true
+				- complementary angles are two angles whose sum is 90
+				- complementary angles do not have to be adjacent
+			- equations of lines in slope-intercept form
+			  collapsed:: true
+				- the slope-intercept form of the equation of a line is y=mx+b where m is the slope and b is the y-intercept
+			- two-step unit conversions
+			- finding properties of lines given in intercept form
+			- factoring trinomials with leading coefficients
+			- solving systems of two linear equations using substitution
+			- visual representations of functions
+			  collapsed:: true
+				- a function is a rule where every input value is assigned precisely one output value
+			- further solving linear inequalities
+			- modeling with linear equations in two variables
+			- solving linear equations with unknown coefficients by factoring
+			- calculating the intersection of two lines
+			- equations of lines in point-slope form
+		- day 12
+		  collapsed:: true
+			- solving multivariable equations
+			  collapsed:: true
+				- when you solve and equation for only one variable, that is called making the variable the subject of the equation
+			- systems of equations with no solutions and infinitely many solutions
+			  collapsed:: true
+				- a system of equations is consistent if it has at least one solution, otherwise it is inconsistent
+				- when it has a single solution, it is consistent independent, otherwise it is consistent dependent
+			- compound AND inequalities
+			- equations of lines in standard form
+			- systems of linear equations with decimal coefficients
+			- the pythagorean theorem
+			- determining properties of lines given in standard form
+			- graphs of functions
+			- converting units of area into larger units
+			- the domain of a function
+			- the roots of a function
+			- piecewise functions
+		- day 13
+			-
 	- feedback
 	  collapsed:: true
 		- diagnostic test needs tweaking because it incorrectly found me competent in some areas and at the start i was presented with many questions which assumed knowledge i didn't have
