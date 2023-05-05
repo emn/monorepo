@@ -28,6 +28,7 @@ flatpak install --noninteractive app/io.podman_desktop.PodmanDesktop/x86_64/stab
 flaptak install --noninteractive app/com.logseq.Logseq/x86_64/stable
 flatpak install --noninteractive com.visualstudio.code
 flatpak install --noninteractive app/io.mpv.Mpv/x86_64/stable
+flatpak install --noninteractive com.calibre_ebook.calibre
 
 # VARS
 BIN=~/.local/bin
@@ -109,4 +110,5 @@ Unavoidably manual steps:
 
 Install anki addons:
   874215009
+  759844606
 EOF
