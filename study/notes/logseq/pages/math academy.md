@@ -1,5 +1,4 @@
 - mathematical foundations i
-  collapsed:: true
 	- diagnostic test
 	  collapsed:: true
 		- ![foo](assets/mathacademy-diagnostics.png)

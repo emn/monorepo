@@ -1,8 +1,0 @@
-Exercise 1.4: Observe that our model of evaluation allows for combinations whose operators are compound expressions. Use this observation to describe the behavior of the following procedure:
-
-(define (a-plus-abs-b a b)
-  ((if (> b 0) + -) a b))
-
----
-
-our evaluation model is applicative-order, so the subexpression (if (> b 0) + -) is first evaluated to either + or -, after which the resulting operator is applied to its operands.

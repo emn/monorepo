@@ -1,0 +1,14 @@
+- [[math academy]]
+- [[lang, basic mathematics]]
+- [[thomas, calculus and analytic geometry]]
+- [[strang, introduction to linear algebra]]
+- [[mathematics for computer science]]
+- ----- undecided if i will continue beyond this point -----
+- [[spivak, calculus]]
+- introductory number theory textbook
+- [[munkres, topology]]
+- [[artin, algebra]]
+- introductory complex analysis textbook
+- advanced linear algebra textbook
+- [[rudin, principles of mathematical analysis]]
+- [[knuth, concrete mathematics]]
