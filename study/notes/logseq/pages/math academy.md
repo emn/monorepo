@@ -3,6 +3,7 @@
 	  collapsed:: true
 		- ![foo](assets/mathacademy-diagnostics.png)
 	- lessons
+	  collapsed:: true
 		- day 1
 		  collapsed:: true
 			- introduction to algebraic expressions
@@ -571,7 +572,12 @@
 			- the roots of a function
 			- piecewise functions
 		- day 13
-			-
+		  collapsed:: true
+			- increasing and decreasing functions
+			- the 30-60-90 triangle
+			- compound OR inequalities
+			- regular polygons
+			- absolute value inequalities
 	- feedback
 	  collapsed:: true
 		- diagnostic test needs tweaking because it incorrectly found me competent in some areas and at the start i was presented with many questions which assumed knowledge i didn't have
@@ -584,5 +590,3 @@
 		- halting lessons for "poor performance" is really frustrating because if i'm struggling with something that is precisely when i want to see and do more examples. shouldnt this be replaced with an option eg. "seems like you are struggling, want to continue now or try again later?"
 		- the tone and design of those "halting lessons" pages really needs to be tweaked; being presented with big red letters that basically say "you're a fucking idiot so we're docking xp" is demoralizing for me as a grown man, i can't imagine how a fourth grader would feel seeing that
 		- value proposition of spaced repetition is long term retention; this is at odds with a subscription-based business model (especially a $50pm one!). a lifetime option is one solution but that seems like it would be difficult to price. another option is a "review only" subscription for say $10pm with which you are unable to learn new material, but can log in to do your reviews
-- mathematical foundations ii
-- mathematical foundations iii

@@ -1,5 +1,5 @@
 ---
-title: "Compsci Week2"
+title: "CompSci Week2"
 date: 2023-04-30T06:39:00+01:00
 draft: false
 ---
