@@ -2,13 +2,13 @@
 - [[lang, basic mathematics]]
 - [[thomas, calculus and analytic geometry]]
 - [[strang, introduction to linear algebra]]
-- [[mathematics for computer science]]
+- [[epp, discrete mathematics with applications]]
 - ----- undecided if i will continue beyond this point -----
 - [[spivak, calculus]]
-- introductory number theory textbook
+- [[nzm, an introduction to the theory of numbers]]
 - [[munkres, topology]]
 - [[artin, algebra]]
-- introductory complex analysis textbook
-- advanced linear algebra textbook
+- [[cartan, elementary theory of analytic functions of one or several complex variables]]
+- [[hoffman/kunze, linear algebra]]
 - [[rudin, principles of mathematical analysis]]
 - [[knuth, concrete mathematics]]

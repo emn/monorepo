@@ -44,8 +44,8 @@
 N1. $a + 0 = 0 + a = a$ \\
 N2. $a + (-a) = 0$ and also $-a + a = 0$
 \subsection{Rules for Addition}
-Commutativity. \textit{If a, b are integers, then} $a + b = b + a$ \\
-Associativity. \textit{If a, b, c are integers, then} $(a + b) + c = a + (b + c)$ \\
+Commutativity. \text{If $a, b$ are integers, then} $a + b = b + a$ \\
+Associativity. \text{If $a, b, c$ are integers, then} $(a + b) + c = a + (b + c)$ \\
 
 \leavevmode \\ %need this to prevent next line from being indented for some reason
 N3. \textit{If $a + b = 0$ then $b = -a$ and $a = -b$}
@@ -192,17 +192,17 @@ therefore
 \newpage
 \leavevmode \\
 Solve for x in the following equations.
-\begin{multicols}{2}
+\begin{multicols}{3}
 \begin{enumerate}
 \setcounter{enumi}{13}
- \item $-2+x=4$\\$x=4+2$
- \item $2-x=5$\\$2-5=x$
- \item $x-3=7$\\$x=7+3$
- \item $-x+4=-1$\\$4+1=x$
- \item $4-x=8$\\$4-8=x$
- \item $-5-x=-2$\\$-5+2=x$
- \item $-7+x=-10$\\$x=-10+7$
- \item $-3+x=4$\\$x=4+3$
+ \item $-2+x=4$	\[x=4+2\]
+ \item $2-x=5$	\[2-5=x\]
+ \item $x-3=7$	\[x=7+3\]
+ \item $-x+4=-1$	\[4+1=x\]
+ \item $4-x=8$	\[4-8=x\]
+ \item $-5-x=-2$	\[-5+2=x\]
+ \item $-7+x=-10$	\[x=-10+7\]
+ \item $-3+x=4$	\[x=4+3\]
 \end{enumerate}
 \end{multicols}
 \leavevmode \\
@@ -231,10 +231,160 @@ Solve for x in the following equations.
 \subsection{Rules for Multiplication}
 Commutativity. $ab = ba$ \\
 Associativity. $(ab)c = a(bc)$ \\
-N6. $1a=a$ and $0a=0$
-
-
-
+N6. $1a=a$ and $0a=0$\\
+Distributivity. $a(b+c) = ab+ac$\\
+N7. $(-1)a = -a$
+\begin{proof}
+ \begin{align*}
+	&(-1)a = -a\\
+	&(-1)a + a = -a + a\\
+	&(-1)a + 1a = 0\\
+	&(-1 + 1)a = 0 &&\text{distributivity}\\
+	&0a = 0
+ \end{align*}
+\end{proof}
+\leavevmode \\
+N8. $-(ab) = (-a)b$
+\begin{proof}
+ \begin{align*}
+	&ab + (-a)b = 0\\
+	&(a+-a)b = 0 &&\text{distributivity}\\
+	&0b = 0\\
+ \end{align*}
+\end{proof}
+\leavevmode \\
+N9. $-(ab) = a(-b)$
+\begin{proof}
+ \begin{align*}
+	&ab + a(-b) = 0\\
+	&a(b-b) = 0 &&\text{distributivity}\\
+	&a0 = 0\\
+ \end{align*}
+\end{proof}
+\leavevmode \\
+N10. $(-a)(-b) = ab$
+\begin{proof}
+ \begin{align*}
+	&(-a)(-b)\\
+	&-a(-b)\\
+	&-(a(-b))&&\text{N9}\\
+	&-(-ab))&&\text{N9}\\
+	&ab&&\text{N4}\\
+ \end{align*}
+\end{proof}
+\leavevmode \\
+N11. If m,n are positive integers, then $a^{m+n} = a^ma^n$\\
+N12. $(a^m)^n = a^{mn}$\\
+\leavevmode \\
+Exercises
+\begin{enumerate}
+ \item Express each of the following expressions in the form $2^m3^na^rb^s$ , where $m,
+n, r, s$ are positive integers.
+ \begin{enumerate}
+  \item $8a^2b^3(27a^4)(2^5ab)$ \[2^83^3a^7b^4\]
+  \item $16b^3a^2(6ab^4)(ab)^3$ \[2^53a^6b^{10}\]
+  \item $3^2(2ab)^3(16a^2b^5)(24b^2a)$ \[2^{10}3^3a^6b^{10}\]
+\item $24a^3(2ab^2)^3(3ab)^2$ \[2^63^3a^8b^8\]
+\item $(3ab)^2(27a^3b)(16ab^5)$ \[2^43^5a^6b^8\]
+\item $32a^4b^5a^3b^2(6ab^3)^4$ \[2^93^4a^{11}b^{14}\]
+ \end{enumerate}
+\item Prove: \[(a + b)^3 = a^3 + 3a^2b + 3ab^2 + b^3\]
+\begin{proof}
+ \begin{align*}
+	&(a + b)^3\\
+	&(a+b)^2(a+b)\\
+	&(a^2+2ab+b^2)(a+b)\\
+	&(a^2+2ab+b^2)a + (a^2+2ab+b^2)b &&\text{distributivity}\\
+	&(a^3+2a^2b+ab^2) + (a^2b+2ab^2+b^3)\\
+	&a^3 + 3a^2b + 3ab^2 + b^3\\
+ \end{align*}
+\end{proof}
+\[(a - b)^3 = a^3 - 3a^2b + 3ab^2 - b^3\]
+\begin{proof}
+ \begin{align*}
+	&(a - b)^3\\
+	&(a-b)^2(a-b)\\
+	&(a^2-2ab+b^2)(a-b)\\
+	&(a^2-2ab+b^2)a + (a^2-2ab+b^2){-b} &&\text{distributivity}\\
+	&(a^3-2a^2b+ab^2) + (-a^2b+2ab^2-b^3)\\
+	&a^3 - 3a^2b + 3ab^2 + b^3\\
+ \end{align*}
+\end{proof}
+\item Obtain expansions for $(a + b)^4$ and $(a — b)^4$ similar to the expansions for $(a + b)^3$ and $(a - b)^3$ of the preceding exercise.
+\[(a + b)^4\]
+\begin{align*}
+ &(a+b)^2(a+b)^2\\
+ &(a^2+2ab+b^2)^2\\
+ &(a^4+4a^2b^2+b^4)\\
+\end{align*}
+\[(a - b)^4\]
+\begin{align*}
+ &(a-b)^2(a-b)^2\\
+ &(a^2-2ab+b^2)^2\\
+ &(a^4+4a^2b^2+b^4)\\
+\end{align*}
+\leavevmode \\
+Expand the following expressions as sums of powers of $x$ multiplied by
+integers.
+\begin{multicols}{2}
+\item $(2-4x)^2$ \[4-16x+16x^2\]
+\item $(1-2x)^2$ \[1-4x+4x^2\]
+\item $(2x+5)^2$ \[4x^2+20x+25\]
+\item $(x-1)^2$ \[x^2-2x+1\]
+\item $(x+1)(x-1)$ \[x^2-1\]
+\item $(2x+1)(x+5)$ \[2x^2+11x+5\]
+\item $(x^2+1)(x^2-1)$ \[x^4-1\]
+\item $(1+x^3)(1-x^3)$ \[1-x^6\]
+\item $(x^2+1)^2$ \[x^4+2x^2+1\]
+\item $(x^2-1)^2$ \[x^4-2x^2+1\]
+\item $(x^2 +2)^2$ \[x^4+4x^2+4\]
+\item $(x^2-2)^2$ \[x^4-4x^2+4\]
+\item $(x^3-4)^2$ \[x^6-8x^3+16\]
+\item $(x^3-4)(x^3+4)$ \[x^6-16\]
+\item $(2x^2+1)(2x^2-1)$ \[4x^4-1\]
+\item $(-2+3x)(-2-3x)$ \[4-9x^2\]
+\item $(x+1)(2x+5)(x-2)$ \[2x^3-4x^2-2x-10\]
+\item $(2x+1)(1-x)(3x+2)$ \[-6x^3-x^2+5x+2\]
+\item $(3x-1)(2x+1)(x+4)$ \[6x^3+25x^2+3x-4\]
+\item $(-1-x)(-2+x)(1-2x)$ \[2x^3+x^2-7x+2\]
+\item $(-4x+1)(2-x)(3+x)$ \[4x^3-3x^2-25x+6\]
+\item $(1-x)(1+x)(2-x)$ \[x^3-3x^2-x+2\]
+\item $(x-1)^2(3-x)$ \[-x^3+5x^2-7x+3\]
+\item $(1-x)^2(2-x)$ \[-x^3+4x^2-5x+2\]
+\item $(1-2x)^2(3+4x)$ \[16x^3-4x^2-8x+3\]
+\item $(2x+1)^2(2-3x)$ \[-6x^3-8x^2-5x+2\]
+\end{multicols}
+\item The population of a city in 1910 was 50,000, and it doubles every 10 years. What will it be (a) in 1970 (b) in 1990 (c) in 2000?
+\begin{enumerate}
+\begin{multicols}{3}
+ \item 3200000
+ \item 12800000
+ \item 25600000
+\end{multicols}
+\end{enumerate}
+\item The population of a city in 1905 was 100,000, and it doubles every 25 years. What will it be after (a) 50 years (b) 100 years (c) 150 years?
+\begin{enumerate}
+\begin{multicols}{3}
+ \item 400000
+ \item 1600000
+ \item 6400000
+\end{multicols}
+\end{enumerate}
+\item The population of a city was 200 thousand in 1915, and it triples every 50 years. What will be the population (a) in the year 2215 (b) in the year 2165?
+\begin{enumerate}
+\begin{multicols}{2}
+ \item 145800000
+ \item 48600000
+\end{multicols}
+\end{enumerate}
+\item The population of a city was 25,000 in 1870, and it triples every 40 years. What will it be (a) in 1990 (b) in 2030?
+\begin{enumerate}
+\begin{multicols}{2}
+ \item 675000
+ \item 2025000
+\end{multicols}
+\end{enumerate}
+\end{enumerate}
 
 
 
