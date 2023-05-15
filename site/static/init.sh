@@ -29,6 +29,7 @@ flaptak install --noninteractive app/com.logseq.Logseq/x86_64/stable
 flatpak install --noninteractive com.visualstudio.code
 flatpak install --noninteractive app/io.mpv.Mpv/x86_64/stable
 flatpak install --noninteractive com.calibre_ebook.calibre
+flatpak install --noninteractive app/org.kde.okular/x86_64/stable
 
 # VARS
 BIN=~/.local/bin
@@ -111,4 +112,7 @@ Unavoidably manual steps:
 Install anki addons:
   874215009
   759844606
+Disable anki unicode normalization:
+Ctrl-Shift-;
+mw.col.conf["normalize_note_text"] = False
 EOF

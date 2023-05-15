@@ -1,14 +1,17 @@
 - [[math academy]]
 - [[lang, basic mathematics]]
-- [[thomas, calculus and analytic geometry]]
-- [[strang, introduction to linear algebra]]
-- [[epp, discrete mathematics with applications]]
-- ----- undecided if i will continue beyond this point -----
 - [[spivak, calculus]]
-- [[nzm, an introduction to the theory of numbers]]
+	- If the student is struggling to write proofs in her or his real analysis text, s/he should definitely seek out "How to Prove It".
 - [[munkres, topology]]
-- [[artin, algebra]]
-- [[cartan, elementary theory of analytic functions of one or several complex variables]]
-- [[hoffman/kunze, linear algebra]]
 - [[rudin, principles of mathematical analysis]]
+	- If you can't reproduce a proof of irrationality after reading through the first few pages, work through Tao's Analysis I first.
+- [[axler, linear algebra done right]]
+	- Noam Elkies uses Axler for Harvard's Math 55 and has written up notes and remarks for his students; be sure to read them: [http://www.math.harvard.edu/~elkies/M55a.16/index.html](http://www.math.harvard.edu/~elkies/M55a.16/index.html)
+- [[hoffman/kunze, linear algebra]]
+- [[hubbard, vector calculus, linear algebra, and differential forms]]
 - [[knuth, concrete mathematics]]
+- --------------------------------------
+- [[dummit/foote, abstract algebra]]
+- [[aluffi, algebra: chapter 0]]
+- [[nzm, an introduction to the theory of numbers]]
+- [[cartan, elementary theory of analytic functions of one or several complex variables]]
