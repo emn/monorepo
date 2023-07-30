@@ -1,0 +1,22 @@
+groups:
+  - name: should_fire
+    rules:
+      - alert: HighPercentageError
+        expr: sum(rate({err="info"}[5m]))
+            /
+          sum(rate({err="notice"}[5m]))
+            > 0.05
+        for: 1m
+        labels:
+            severity: page
+        annotations:
+            summary: High request latency
+  - name: credentials_leak
+    rules:
+      - alert: http-credentials-leaked
+        annotations:
+          message: "{{ $labels.job }} someone logged in."
+        expr: 'sum(count_over_time({job="syslogng"} |= "Login Success" [5m]) > 0)'
+        for: 1m
+        labels:
+          severity: critical

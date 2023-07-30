@@ -1,0 +1,17 @@
+---
+targets:
+  10.1.32.100:57400:
+    username: cisco
+    password: cisco123
+    insecure: true
+subscriptions:
+  interface_counters:
+    paths:
+      - "/interfaces/interface/state/counters"
+    stream-mode: sample
+    sample-interval: 5s
+outputs:
+  victoria:
+    type: prometheus
+    listen: :9081
+    path: /metrics

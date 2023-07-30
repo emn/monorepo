@@ -1,0 +1,12 @@
+function _TEMPLATE_ {
+  param(
+    [parameter(mandatory=$true)][OrderedDictionary]$Rule,
+    [parameter(mandatory=$true)][pscustomobject]$Issue
+  )
+
+  try {
+    return $Rule
+  } catch {
+    continue
+  }
+}
