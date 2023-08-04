@@ -2,11 +2,12 @@ defmodule Todo.Server do
   use GenServer
 
   def start(name) do
-    GenServer.start(__MODULE__, name)
+    GenServer.start_link(__MODULE__, name)
   end
 
   @impl GenServer
   def init(name) do
+    IO.puts("Starting todo server #{inspect(self())}")
     {:ok, {name, nil}, {:continue, :init}}
   end
 
