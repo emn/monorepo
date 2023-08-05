@@ -2,15 +2,15 @@ defmodule Todo.CacheTest do
   use ExUnit.Case
 
   test "server_process" do
-    {:ok, p} = Todo.Cache.start()
-    l = Todo.Cache.server_process(p, "goats")
+    {:ok, p} = Todo.Supervisor.start_link()
+    l = Todo.Cache.server_process("goats")
 
-    assert l != Todo.Cache.server_process(p, "sheep")
-    assert l == Todo.Cache.server_process(p, "goats")
+    assert l != Todo.Cache.server_process("sheep")
+    assert l == Todo.Cache.server_process("goats")
   end
 
   test "todo operations" do
-    {:ok, p} = Todo.Cache.start()
+    {:ok, p} = Todo.Supervisor.start_link()
     a = Todo.Cache.server_process(p, "a")
     Todo.Server.add_entry(a, %{date: ~D[2023-12-20], title: "Boo"})
 
