@@ -1,0 +1,16 @@
+<.header>
+  Search for a product by its SKU
+</.header>
+
+<.simple_form
+  for={@form}
+  id="search-form"
+  phx-change="validate"
+  phx-submit="search"
+>
+  <.input field={@form[:sku]} type="text" label="SKU" />
+  
+  <:actions>
+    <.button phx-disable-with="Sending...">Search</.button>
+  </:actions>
+</.simple_form>
