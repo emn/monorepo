@@ -1,7 +1,6 @@
 defmodule PentoWeb.SearchLive do
   use PentoWeb, :live_view
   alias Pento.Search.Query
-  alias Pento.Catalog.Product
 
   def mount(_params, _session, sock) do
     changeset = Query.changeset(%Query{}, %{sku: ""})

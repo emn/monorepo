@@ -1,0 +1,12 @@
+<DemographicLive.Show.title heading="title">
+a configurable message
+</DemographicLive.Show.title>
+<Component.hero content="Survey">
+Please fill out our survey
+</Component.hero>
+<%= if @streams.demographic do %>
+    <DemographicLive.Show.details streams={@streams}/>
+<% else %>
+  <h2>Demographic form coming soon</h2>
+<% end  %>
+<Component.list items={["a","b","c"]}/>
