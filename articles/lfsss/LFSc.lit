@@ -1,0 +1,984 @@
+@title LFS: a companion
+
+@s introduction
+this article was written to be read alongside the LFS book.
+
+--- create-host.sh
+mkdir LFSc && cd "$_"
+@{create-vm}
+@{launch-vm}
+---
+--- prepare-host.sh
+myfn () {
+@{partition}
+# without this, mkfs will error
+sleep 1
+@{format}
+@{export variables}
+@{mount}
+@{sources}
+@{directory structure}
+@{lfs user}
+# allow for passwordless login to new account
+passwd -d lfs
+}
+ssh root@127.0.0.1 -p 2222 "$(typeset -f myfn); myfn"
+---
+--- prepare-lfs.sh
+myfn () {
+@{bash setup}
+}
+ssh lfs@127.0.0.1 -p 2222 "$(typeset -f myfn); myfn"
+myfn2 () {
+cd /mnt/lfs/root/sources
+@{pass 1 binutils}
+@{pass 1 gcc}
+@{linux api headers}
+@{glibc}
+@{libstdc++}
+@{m4}
+@{ncurses}
+@{bash}
+@{coreutils}
+@{diffutils}
+@{file}
+@{findutils}
+@{gawk}
+@{grep}
+@{gzip}
+@{make}
+@{patch}
+@{sed}
+@{tar}
+@{xz}
+@{pass 2 binutils}
+@{pass 2 gcc}
+}
+ssh lfs@127.0.0.1 -p 2222 "$(typeset -f myfn2); myfn2"
+---
+
+--- chroot-lfs.sh
+myfn () {
+@{revert dir ownership}
+@{mount device files}
+}
+#ssh root@127.0.0.1 -p 2222 "source .bash_profile; $(typeset -f myfn); myfn"
+
+ssh root@127.0.0.1 -p 2222 << "EOF"
+source .bash_profile;
+myfn2 () {
+@{chroot1}
+}
+declare -f myfn2 > $ROOT/script.sh
+/usr/sbin/chroot "$ROOT"     \
+ /usr/bin/env -i             \
+ HOME=/root                  \
+ TERM="$TERM"                \
+ PS1='(lfs chroot) \u:\w\$'  \
+ PATH=/usr/bin:/usr/sbin     \
+ /bin/bash -c "source script.sh; myfn2; rm script.sh"
+EOF
+
+ssh root@127.0.0.1 -p 2222 << "EOF"
+source .bash_profile;
+myfn2 () {
+@{chroot2}
+}
+declare -f myfn2 > $ROOT/script.sh
+/usr/sbin/chroot "$ROOT"     \
+ /usr/bin/env -i             \
+ HOME=/root                  \
+ TERM="$TERM"                \
+ PS1='(lfs chroot) \u:\w\$'  \
+ PATH=/usr/bin:/usr/sbin     \
+ /bin/bash -c "source script.sh; myfn2; rm script.sh"
+EOF
+---
+
+
+@s stage0
+--- create-vm
+#wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img --output-document host.img
+cp ../jammy-server-cloudimg-amd64.img host.img
+cp ../prepare-host.sh .
+
+qemu-img resize host.img 10G
+qemu-img create -f qcow2 lfs.img 30G
+
+cat > init.sh << "OUTER_EOF"
+
+growpart /dev/sda 1
+resize2fs /dev/sda1
+
+passwd -d root
+cat << "EOF" > /etc/ssh/sshd_config.d/lfs.conf
+PermitRootLogin yes
+PermitEmptyPasswords yes
+EOF
+systemctl restart sshd
+
+apt update
+apt install --yes --fix-missing binutils bison gawk gcc g++ m4 make texinfo
+ln -sf /bin/bash /bin/sh
+
+OUTER_EOF
+
+virt-customize --add host.img --firstboot init.sh
+---
+
+now that our host system is ready, we'll boot it up and connect to it via ssh
+--- launch-vm
+qemu-system-x86_64 -m 8G -smp $(nproc) -accel kvm -cpu host \
+ -nic user,hostfwd=tcp::2222-:22 \
+ -hda host.img \
+ -hdb lfs.img \
+ -daemonize
+ ssh root@127.0.0.1 -p 2222
+---
+
+from now on, all commands are run on our host through this ssh session, unless otherwise specified.
+
+@s stage1
+we need to partition lfs.img, which has been attached to our system at /dev/sdb.
+we won't bother creating a swap partition as we have provided plenty of memory to our host.
+for now, we'll just create boot and root partitions.
+https://www.gnu.org/software/parted/manual/parted.html
+--- partition
+parted /dev/sdb mklabel gpt
+---
+first we create a partition table on our blank disk.
+a GPT partition table reserves 34 sectors at the start and end of the disk.
+
+you will have noticed the output `Information: You may need to update /etc/fstab.`
+/etc/fstab (from 'filesystem table') is a configuration file which controls the mounting of filesystems when detected by a linux system on boot.
+provided you complete your LFS build in one session this will not be necessary, but if you have to reboot at some stage there's a good chance you will forget to mount these partitions, so we will update our fstab later.
+
+--- partition +=
+parted /dev/sdb mkpart boot fat32 34s 1GiB
+parted /dev/sdb set 1 esp on
+---
+here we create a partition called "boot", with a filesystem type of fat32.
+we start our partition at the first available sector, and end it 1 Gibibyte from the start.
+the output will show `Warning: The resulting partition is not properly aligned for best performance: 34s % 2048s != 0s`
+partition alignment is a little involved, and learning about it is out of scope, so we will ignore this.
+we also set the esp flag to let our UEFI firmware know that this is an EFI System Partition.
+
+--- partition +=
+parted /dev/sdb -- mkpart root ext4 1GiB -34s print
+---
+then we create our root partition, starting from an offset of 1GiB and ending at the last available sector.
+in bash and other shells the double dashes `--` signify the end of command options, and are required to prevent `-34s` from being interpreted by parted as an argument.
+
+we can use `parted /dev/sdb print` to confirm the disk was successfully partitioned.
+the output should look something like this:
+<pre>
+Model: ATA QEMU HARDDISK (scsi)
+Disk /dev/sdb: 32.2GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags: 
+
+Number  Start   End     Size    File system  Name  Flags
+ 1      17.4kB  1074MB  1074MB               boot  boot, esp
+ 2      1074MB  32.2GB  31.1GB  ext4         root
+</pre>
+
+--- format
+mkfs.fat -F 32 -n BOOT /dev/sdb1
+mkfs.ext4 -L ROOT /dev/sdb2
+---
+we create filesystems on our new partitions and label them appropriately
+
+--- export variables
+echo "export BOOT=/mnt/lfs/boot ROOT=/mnt/lfs/root" >> /root/.bash_profile
+source .bash_profile
+---
+`export` does something
+when we log in to our host system, bash executes commands found in the `.bash_profile` file in the user's home directory.
+this ensures that the variables will always be available, even if we disconnect from or reboot the host.
+
+--- mount
+mkdir --parents $BOOT $ROOT
+mount /dev/sdb1 $BOOT
+mount /dev/sdb2 $ROOT
+cat >> /etc/fstab << "EOF"
+LABEL=ROOT /mnt/lfs/root ext4 defaults 0 0
+LABEL=BOOT /mnt/lfs/boot vfat defaults 0 0
+EOF
+---
+we create two directories to which we mount our new filesystems, and add rules for mounting them to fstab.
+
+--- sources
+mkdir $ROOT/sources
+chmod -v a+wt $ROOT/sources
+cd $ROOT/sources
+wget http://ftp.lfs-matrix.net/pub/lfs/lfs-packages/lfs-packages-12.0.tar
+tar --extract --file lfs-packages-12.0.tar
+---
+we create a directory `sources` and modify its permissions such that other users can write to it, but only we (root) can delete files within it.
+we download an archive of all the required packages from a mirror and extract it
+
+@s stage2
+we have finished preparing our disk, so it is time to start building our new linux system.
+https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
+the FHS documents common practices at a given time and is updated as and when they change.
+thus most modern linux distributions deviate from the standard in some way, so while it is a useful convention, do not take it to be authoritative.
+
+--- directory structure
+mkdir --parents $ROOT/{etc,var,lib64} $ROOT/usr/{bin,lib,sbin}
+for i in bin lib sbin; do
+  ln -sv usr/$i $ROOT/$i
+done
+mkdir $ROOT/tools
+---
+we begin by creating some required directories
+`/etc` is now used for storing configuration files, but historically it held that which did not belong elsewhere, hence the name (et cetera).
+`/var` is for storing variable data files; files generated during programs at runtime such as logs and caches. 
+`/usr` is for shareable read-only data.
+`/usr/bin` is the primary store of executables.
+`/usr/lib` is for storing shared libraries.
+`/usr/sbin` is for storing binaries used for system administration.
+in common with some other modern linux distributions, we will not differentiate between the `bin`, `lib` and `sbin` directories under `/usr` and those at the root of our filesystem.
+however for compatibility reasons the directories are required, so we create symlinks instead.
+finally we create a `tools` directory, which will store the cross-compiler that we will use later
+
+--- lfs user
+groupadd lfs
+useradd -s /bin/bash -g lfs -m -k /dev/null lfs
+chown lfs $ROOT/{usr{,/*},var,etc,lib64,tools}
+rm /etc/bash.bashrc
+---
+to ensure a clean build environment, we create a new user.
+we'll give it ownership of the directory structure we created.
+we can now switch to our new user.
+while we are still root, let's delete `/etc/bash.bashrc` to prevent it contaminating our build environment.
+
+--- bash setup
+su - lfs
+
+cat > ~/.bash_profile << "EOF"
+exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
+EOF
+
+cat > ~/.bashrc << "EOF"
+set +h
+umask 022
+BOOT=/mnt/lfs/boot
+ROOT=/mnt/lfs/root
+LC_ALL=POSIX
+LFS_TGT=$(uname -m)-lfs-linux-gnu
+PATH=/usr/bin
+if [ ! -L /bin ]; then PATH=/bin:$PATH; fi
+PATH=$ROOT/tools/bin:$PATH
+CONFIG_SITE=$ROOT/usr/share/config.site
+export BOOT ROOT LC_ALL LFS_TGT PATH CONFIG_SITE
+EOF
+
+source ~/.bash_profile
+---
+we create a `.bash_profile` and `.bashrc`, then read the new profile into our current shell with `source`.
+the details of these two files are explained in LFS.
+
+@s stage3 cross-compiler
+
+--- pass 1 binutils
+cd $ROOT/sources
+tar --extract --file 12.0/binutils-2.41.tar.xz
+(
+cd binutils-2.41
+mkdir build
+(
+cd build
+../configure --prefix=$ROOT/tools \
+             --with-sysroot=$ROOT \
+             --target=$LFS_TGT   \
+             --disable-nls       \
+             --enable-gprofng=no \
+             --disable-werror
+make -j $(nproc)
+make install
+)
+)
+rm --recursive --force binutils-2.41
+---
+--- pass 1 gcc
+tar --extract --file  12.0/gcc-13.2.0.tar.xz
+(
+cd gcc-13.2.0
+tar --extract --file ../12.0/mpfr-4.2.0.tar.xz
+mv mpfr-4.2.0 mpfr
+tar --extract --file ../12.0/gmp-6.3.0.tar.xz
+mv gmp-6.3.0 gmp
+tar --extract --file ../12.0/mpc-1.3.1.tar.gz
+mv mpc-1.3.1 mpc
+sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+mkdir build
+(
+cd build
+../configure                  \
+    --target=$LFS_TGT         \
+    --prefix=$ROOT/tools      \
+    --with-glibc-version=2.38 \
+    --with-sysroot=$ROOT      \
+    --with-newlib             \
+    --without-headers         \
+    --enable-default-pie      \
+    --enable-default-ssp      \
+    --disable-nls             \
+    --disable-shared          \
+    --disable-multilib        \
+    --disable-threads         \
+    --disable-libatomic       \
+    --disable-libgomp         \
+    --disable-libquadmath     \
+    --disable-libssp          \
+    --disable-libvtv          \
+    --disable-libstdcxx       \
+    --enable-languages=c,c++
+make -j $(nproc)
+make install
+)
+cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
+  $(dirname $($LFS_TGT-gcc -print-libgcc-file-name))/include/limits.h
+)
+rm --recursive --force gcc-13.2.0
+---
+--- linux api headers
+tar --extract --file 12.0/linux-6.4.12.tar.xz
+(
+cd linux-6.4.12
+make mrproper
+make headers
+find usr/include -type f ! -name '*.h' -delete
+cp --recursive usr/include $ROOT/usr
+)
+rm --recursive --force linux-6.4.12
+---
+--- glibc
+tar --extract --file 12.0/glibc-2.38.tar.xz
+(
+cd glibc-2.38
+ln -sf ../lib/ld-linux-x86-64.so.2 $ROOT/lib64
+ln -sf ../lib/ld-linux-x86-64.so.2 $ROOT/lib64/ld-lsb-x86-64.so.3
+patch -Np1 -i $ROOT/sources/12.0/glibc-2.38-fhs-1.patch
+mkdir build
+(
+cd build
+echo "rootsbindir=/usr/sbin" > configparms
+../configure                             \
+      --prefix=/usr                      \
+      --host=$LFS_TGT                    \
+      --build=$(../scripts/config.guess) \
+      --enable-kernel=4.14               \
+      --with-headers=$ROOT/usr/include    \
+      libc_cv_slibdir=/usr/lib
+make -j 1
+make DESTDIR=$ROOT install
+)
+sed '/RTLDLIST=/s@/usr@@g' -i $ROOT/usr/bin/ldd
+)
+rm --recursive --force glibc-2.38
+---
+
+---
+echo 'int main(){}' | $LFS_TGT-gcc -xc -
+readelf -l a.out | grep ld-linux
+rm a.out
+---
+
+--- libstdc++
+tar --extract --file 12.0/gcc-13.2.0.tar.xz
+(
+cd gcc-13.2.0
+mkdir build
+(
+cd build
+../libstdc++-v3/configure           \
+    --host=$LFS_TGT                 \
+    --build=$(../config.guess)      \
+    --prefix=/usr                   \
+    --disable-multilib              \
+    --disable-nls                   \
+    --disable-libstdcxx-pch         \
+    --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/13.2.0
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm $ROOT/usr/lib/lib{stdc++,stdc++fs,supc++}.la
+)
+rm --recursive --force gcc-13.2.0
+---
+
+@s stage4 - cross compiling tools
+--- m4
+tar --extract --file 12.0/m4-1.4.19.tar.xz
+(
+cd m4-1.4.19
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force m4-1.4.19
+---
+
+--- ncurses
+tar --extract --file 12.0/ncurses-6.4.tar.gz
+(
+cd ncurses-6.4
+sed -i s/mawk// configure
+mkdir build
+(
+cd build
+../configure
+make -C include -j $(nproc)
+make -C progs tic -j $(nproc)
+)
+./configure --prefix=/usr                \
+            --host=$LFS_TGT              \
+            --build=$(./config.guess)    \
+            --mandir=/usr/share/man      \
+            --with-manpage-format=normal \
+            --with-shared                \
+            --without-normal             \
+            --with-cxx-shared            \
+            --without-debug              \
+            --without-ada                \
+            --disable-stripping          \
+            --enable-widec
+make -j $(nproc)
+make DESTDIR=$ROOT TIC_PATH=$(pwd)/build/progs/tic install
+echo "INPUT(-lncursesw)" > $ROOT/usr/lib/libncurses.so
+)
+rm --recursive --force ncurses-6.4
+---
+
+--- bash
+tar --extract --file 12.0/bash-5.2.15.tar.gz
+(
+cd bash-5.2.15
+./configure --prefix=/usr                      \
+            --build=$(sh support/config.guess) \
+            --host=$LFS_TGT                    \
+            --without-bash-malloc
+make -j $(nproc)
+make DESTDIR=$ROOT install
+ln -s bash $ROOT/bin/sh
+)
+rm --recursive --force bash-5.2.15
+---
+
+--- coreutils
+tar --extract --file 12.0/coreutils-9.3.tar.xz
+(
+cd coreutils-9.3
+./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess) \
+            --enable-install-program=hostname \
+            --enable-no-install-program=kill,uptime \
+            gl_cv_macro_MB_CUR_MAX_good=y
+make -j $(nproc)
+make DESTDIR=$ROOT install
+mv $ROOT/usr/bin/chroot              $ROOT/usr/sbin
+mkdir --parents $ROOT/usr/share/man/man8
+mv $ROOT/usr/share/man/man1/chroot.1 $ROOT/usr/share/man/man8/chroot.8
+sed -i 's/"1"/"8"/'                    $ROOT/usr/share/man/man8/chroot.8
+)
+rm --recursive --force coreutils-9.3
+---
+
+
+
+--- diffutils
+tar --extract --file 12.0/diffutils-3.10.tar.xz
+(
+cd diffutils-3.10
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(./build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force diffutils-3.10
+---
+--- file
+tar --extract --file 12.0/file-5.45.tar.gz
+(
+cd file-5.45
+mkdir build
+(
+cd build
+../configure --disable-bzlib      \
+             --disable-libseccomp \
+             --disable-xzlib      \
+             --disable-zlib
+make
+)
+./configure --prefix=/usr --host=$LFS_TGT --build=$(./config.guess)
+make -j $(nproc) FILE_COMPILE=$(pwd)/build/src/file
+make DESTDIR=$ROOT install
+rm $ROOT/usr/lib/libmagic.la
+)
+rm --recursive --force file-5.45
+---
+--- findutils
+tar --extract --file 12.0/findutils-4.9.0.tar.xz
+(
+cd findutils-4.9.0
+./configure --prefix=/usr                   \
+            --localstatedir=/var/lib/locate \
+            --host=$LFS_TGT                 \
+            --build=$(build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force findutils-4.9.0
+---
+--- gawk
+tar --extract --file 12.0/gawk-5.2.2.tar.xz 
+(
+cd gawk-5.2.2
+sed -i 's/extras//' Makefile.in
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force gawk-5.2.2
+---
+--- grep
+tar --extract --file 12.0/grep-3.11.tar.xz
+(
+cd grep-3.11
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(./build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force grep-3.11
+---
+--- gzip
+tar --extract --file 12.0/gzip-1.12.tar.xz
+(
+cd gzip-1.12
+./configure --prefix=/usr --host=$LFS_TGT
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force gzip-1.12
+---
+--- make
+tar --extract --file 12.0/make-4.4.1.tar.gz
+(
+cd make-4.4.1
+./configure --prefix=/usr   \
+            --without-guile \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force make-4.4.1
+---
+--- patch
+tar --extract --file 12.0/patch-2.7.6.tar.xz
+(
+cd patch-2.7.6
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force patch-2.7.6
+---
+--- sed
+tar --extract --file 12.0/sed-4.9.tar.xz
+(
+cd sed-4.9
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(./build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force sed-4.9
+---
+--- tar
+tar --extract --file 12.0/tar-1.35.tar.xz
+(
+cd tar-1.35
+./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess)
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force tar-1.35
+---
+--- xz
+tar --extract --file 12.0/xz-5.4.4.tar.xz
+(
+cd xz-5.4.4
+./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess) \
+            --disable-static                  \
+            --docdir=/usr/share/doc/xz-5.4.4
+make -j $(nproc)
+make DESTDIR=$ROOT install
+rm $ROOT/usr/lib/liblzma.la
+)
+rm --recursive --force xz-5.4.4
+---
+--- pass 2 binutils
+tar --extract --file 12.0/binutils-2.41.tar.xz
+(
+cd  binutils-2.41
+sed '6009s/$add_dir//' -i ltmain.sh
+mkdir build
+(
+cd build
+../configure                   \
+    --prefix=/usr              \
+    --build=$(../config.guess) \
+    --host=$LFS_TGT            \
+    --disable-nls              \
+    --enable-shared            \
+    --enable-gprofng=no        \
+    --disable-werror           \
+    --enable-64-bit-bfd
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm -v $ROOT/usr/lib/lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.{a,la}
+)
+rm --recursive --force binutils-2.41
+---
+--- pass 2 gcc
+tar --extract --file 12.0/gcc-13.2.0.tar.xz
+(
+cd gcc-13.2.0
+tar -xf ../12.0/mpfr-4.2.0.tar.xz
+mv -v mpfr-4.2.0 mpfr
+tar -xf ../12.0/gmp-6.3.0.tar.xz
+mv -v gmp-6.3.0 gmp
+tar -xf ../12.0/mpc-1.3.1.tar.gz
+mv -v mpc-1.3.1 mpc
+sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+sed '/thread_header =/s/@.*@/gthr-posix.h/' \
+    -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
+mkdir build
+(
+cd build
+../configure                                       \
+    --build=$(../config.guess)                     \
+    --host=$LFS_TGT                                \
+    --target=$LFS_TGT                              \
+    LDFLAGS_FOR_TARGET=-L$PWD/$LFS_TGT/libgcc      \
+    --prefix=/usr                                  \
+    --with-build-sysroot=$ROOT                     \
+    --enable-default-pie                           \
+    --enable-default-ssp                           \
+    --disable-nls                                  \
+    --disable-multilib                             \
+    --disable-libatomic                            \
+    --disable-libgomp                              \
+    --disable-libquadmath                          \
+    --disable-libsanitizer                         \
+    --disable-libssp                               \
+    --disable-libvtv                               \
+    --enable-languages=c,c++
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+ln -sv gcc $ROOT/usr/bin/cc
+)
+rm --recursive --force gcc-13.2.0
+---
+
+@s stage4 chroot
+
+we are now going to chroot into our newly built environment
+
+--- revert dir ownership
+#exit
+chown --recursive root:root $ROOT/{usr,lib,var,etc,bin,sbin,lib64,tools}
+---
+first we change ownership of all the directories we created back to root, as the LFS user was only needed temporarily for cleanly building the cross-toolchain and won't exist on our new system.
+
+--- mount device files
+mkdir --parents $ROOT/{dev,proc,sys,run}
+mount --bind /dev $ROOT/dev
+mount --bind /dev/pts $ROOT/dev/pts
+mount --types proc proc $ROOT/proc
+mount --types sysfs sysfs $ROOT/sys
+mount --types tmpfs tmpfs $ROOT/run
+mount --types tmpfs --options nosuid,nodev tmpfs $ROOT/dev/shm
+---
+we mount all our special device files
+
+--- enter chroot
+/usr/sbin/chroot "$ROOT" /usr/bin/env -i  \
+ HOME=/root                  \
+ TERM="$TERM"                \
+ PS1='(lfs chroot) \u:\w\$ ' \
+ PATH=/usr/bin:/usr/sbin     \
+ /bin/bash --login
+---
+enter chroot
+
+--- chroot1
+mkdir -pv /{boot,home,mnt,opt,srv}
+mkdir -pv /etc/{opt,sysconfig}
+mkdir -pv /lib/firmware
+mkdir -pv /media/{floppy,cdrom}
+mkdir -pv /usr/{,local/}{include,src}
+mkdir -pv /usr/local/{bin,lib,sbin}
+mkdir -pv /usr/{,local/}share/{color,dict,doc,info,locale,man}
+mkdir -pv /usr/{,local/}share/{misc,terminfo,zoneinfo}
+mkdir -pv /usr/{,local/}share/man/man{1..8}
+mkdir -pv /var/{cache,local,log,mail,opt,spool}
+mkdir -pv /var/lib/{color,misc,locate}
+ln -sfv /run /var/run
+ln -sfv /run/lock /var/lock
+install -dv -m 0750 /root
+install -dv -m 1777 /tmp /var/tmp
+---
+
+--- chroot2
+ln -sv /proc/self/mounts /etc/mtab
+
+cat > /etc/hosts << EOF
+127.0.0.1  localhost $(hostname)
+::1        localhost
+EOF
+
+cat > /etc/passwd << "EOF"
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/dev/null:/usr/bin/false
+daemon:x:6:6:Daemon User:/dev/null:/usr/bin/false
+messagebus:x:18:18:D-Bus Message Daemon User:/run/dbus:/usr/bin/false
+systemd-journal-gateway:x:73:73:systemd Journal Gateway:/:/usr/bin/false
+systemd-journal-remote:x:74:74:systemd Journal Remote:/:/usr/bin/false
+systemd-journal-upload:x:75:75:systemd Journal Upload:/:/usr/bin/false
+systemd-network:x:76:76:systemd Network Management:/:/usr/bin/false
+systemd-resolve:x:77:77:systemd Resolver:/:/usr/bin/false
+systemd-timesync:x:78:78:systemd Time Synchronization:/:/usr/bin/false
+systemd-coredump:x:79:79:systemd Core Dumper:/:/usr/bin/false
+uuidd:x:80:80:UUID Generation Daemon User:/dev/null:/usr/bin/false
+systemd-oom:x:81:81:systemd Out Of Memory Daemon:/:/usr/bin/false
+nobody:x:65534:65534:Unprivileged User:/dev/null:/usr/bin/false
+EOF
+
+cat > /etc/group << "EOF"
+root:x:0:
+bin:x:1:daemon
+sys:x:2:
+kmem:x:3:
+tape:x:4:
+tty:x:5:
+daemon:x:6:
+floppy:x:7:
+disk:x:8:
+lp:x:9:
+dialout:x:10:
+audio:x:11:
+video:x:12:
+utmp:x:13:
+usb:x:14:
+cdrom:x:15:
+adm:x:16:
+messagebus:x:18:
+systemd-journal:x:23:
+input:x:24:
+mail:x:34:
+kvm:x:61:
+systemd-journal-gateway:x:73:
+systemd-journal-remote:x:74:
+systemd-journal-upload:x:75:
+systemd-network:x:76:
+systemd-resolve:x:77:
+systemd-timesync:x:78:
+systemd-coredump:x:79:
+uuidd:x:80:
+systemd-oom:x:81:
+wheel:x:97:
+users:x:999:
+nogroup:x:65534:
+EOF
+
+echo "tester:x:101:101::/home/tester:/bin/bash" >> /etc/passwd
+echo "tester:x:101:" >> /etc/group
+install -o tester -d /home/tester
+---
+--- chroot3
+exec /usr/bin/bash --login
+
+touch /var/log/{btmp,lastlog,faillog,wtmp}
+chgrp -v utmp /var/log/lastlog
+chmod -v 664  /var/log/lastlog
+chmod -v 600  /var/log/btmp
+
+cd sources
+---
+
+---
+tar --extract --file 12.0/gettext-0.22.tar.xz
+(
+cd gettext-0.22
+./configure --disable-shared
+make -j $(nproc)
+cp -v gettext-tools/src/{msgfmt,msgmerge,xgettext} /usr/bin
+)
+rm --recursive --force gettext-0.22
+---
+
+---
+tar --extract --file 12.0/bison-3.8.2.tar.xz
+(
+cd bison-3.8.2
+./configure --prefix=/usr \
+            --docdir=/usr/share/doc/bison-3.8.2
+make -j $(nproc)
+make install
+)
+rm --recursive --force bison-3.8.2
+---
+
+---
+tar --extract --file 12.0/perl-5.38.0.tar.xz
+(
+cd perl-5.38.0
+sh Configure -des                                        \
+             -Dprefix=/usr                               \
+             -Dvendorprefix=/usr                         \
+             -Duseshrplib                                \
+             -Dprivlib=/usr/lib/perl5/5.38/core_perl     \
+             -Darchlib=/usr/lib/perl5/5.38/core_perl     \
+             -Dsitelib=/usr/lib/perl5/5.38/site_perl     \
+             -Dsitearch=/usr/lib/perl5/5.38/site_perl    \
+             -Dvendorlib=/usr/lib/perl5/5.38/vendor_perl \
+             -Dvendorarch=/usr/lib/perl5/5.38/vendor_perl
+make -j $(nproc)
+make install
+)
+rm --recursive --force perl-5.38.0
+---
+
+---
+tar --extract --file 12.0/Python-3.11.4.tar.xz
+(
+cd Python-3.11.4
+./configure --prefix=/usr   \
+            --enable-shared \
+            --without-ensurepip
+make -j $(nproc)
+make install
+)
+rm --recursive --force Python-3.11.4 
+---
+
+---
+tar --extract --file 12.0/texinfo-7.0.3.tar.xz
+(
+cd texinfo-7.0.3
+./configure --prefix=/usr
+make -j $(nproc)
+make install
+)
+rm --recursive --force texinfo-7.0.3
+---
+
+---
+tar --extract --file 12.0/util-linux-2.39.1.tar.xz
+(
+cd util-linux-2.39.1
+mkdir -pv /var/lib/hwclock
+./configure ADJTIME_PATH=/var/lib/hwclock/adjtime    \
+            --libdir=/usr/lib    \
+            --runstatedir=/run   \
+            --docdir=/usr/share/doc/util-linux-2.39.1 \
+            --disable-chfn-chsh  \
+            --disable-login      \
+            --disable-nologin    \
+            --disable-su         \
+            --disable-setpriv    \
+            --disable-runuser    \
+            --disable-pylibmount \
+            --disable-static     \
+            --without-python
+make -j $(nproc)
+make install
+)
+rm --recursive --force util-linux-2.39.1
+---
+
+--- cleanup
+rm -rf /usr/share/{info,man,doc}/*
+find /usr/{lib,libexec} -name \*.la -delete
+rm -rf /tools
+---
+
+@s stage5
+
+
+
+
+
+
+
+
+
+
+
+
+--- launch-vm --- :=
+qemu-system-x86_64 -m 8G -smp $(nproc) -accel kvm -cpu host \
+ -nic user,hostfwd=tcp::2222-:22 \
+ -hda host.img \
+ -hdb lfs.img \
+ -daemonize
+---
+
+--- sources --- :=
+mkdir $ROOT/sources
+chmod -v a+wt $ROOT/sources
+cd $ROOT/sources
+wget --progress=dot:giga http://ftp.lfs-matrix.net/pub/lfs/lfs-packages/lfs-packages-12.0.tar
+tar --extract --file lfs-packages-12.0.tar
+---
+
+--- bash setup --- :=
+cat > ~/.bash_profile << "EOF"
+exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
+EOF
+
+cat > ~/.bashrc << "EOF"
+set +h
+umask 022
+BOOT=/mnt/lfs/boot
+ROOT=/mnt/lfs/root
+LC_ALL=POSIX
+LFS_TGT=$(uname -m)-lfs-linux-gnu
+PATH=/usr/bin
+if [ ! -L /bin ]; then PATH=/bin:$PATH; fi
+PATH=$ROOT/tools/bin:$PATH
+CONFIG_SITE=$ROOT/usr/share/config.site
+export BOOT ROOT LC_ALL LFS_TGT PATH CONFIG_SITE
+EOF
+---
+
+--- foo
+tar --extract --file 12.0/
+(
+cd 
+make -j $(nproc)
+make DESTDIR=$ROOT install
+)
+rm --recursive --force 
+---
