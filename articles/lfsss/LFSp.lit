@@ -4,7 +4,12 @@
 in my experience, many network engineers lack an intuition about what linux is and how it works, despite its increasing importance in our field.
 counting myself among them, i set out to deepen my understanding.
 the foremost resource for that purpose is Linux From Scratch, but after skimming through the book, i felt that i first needed a higher level overview of the material.
-this article is the first in a series designed to supplement LFS.
+this article is the first in a series intended to supplement LFS.
+
+
+a bash script is available which runs all of the commands seen below, to save the reader from copy pasting.
+both this HTML and the bash script are generated from the same source file, which was written using literate programming techniques.
+
 
 if you'd like to follow along, i suggest a clean install of ubuntu 22.04.3 LTS.
 
@@ -136,29 +141,35 @@ qemu-system-x86_64 -m 512M -kernel /boot/vmlinuz -hda rootfs.ext2.qcow2 -append 
 
 granted, it's not very useful, but at least it hasn't crashed - we finally have our linux kernel running.
 i hope you can see now that it is not (only) pedantry that drives some to insist on linux' status as "just" a kernel and not an OS; the distinction is an important one.
-building an operating system with the linux kernel at the centre is the job of distributions, and the focus of the LFS book, so we won't explore it here.
+(okay, in some contexts it is fine to refer to the "Linux operating system"; just don't get confused)
+building an operating system with the linux kernel at the centre is the job of distributions, and the focus of Linux From Scratch, so we won't explore it in this primer.
 instead: qemu has been giving us quite a leg up by running our kernel directly for us, and that's not cricket.
 
 @s stage3 - booting from disk with UEFI
 
 you likely know what a BIOS is and does; you may not know that almost no modern computers ship with a BIOS - they now use UEFI.
-these are in fact entirely different things, although some people mistakenly (but understandably) believe that BIOS is a generic term, and that UEFI is a "type of" BIOS.
-we will only cover the minimum we need to know to get our system running using qemu's UEFI firmware, which is called OVMF.
-there are four major concepts we need to understand:
+these are in fact entirely different things, although some mistakenly (but understandably) believe that BIOS is a generic term, and that UEFI is a "type of" BIOS.
+because BIOS is by now a legacy standard, we will be using qemu's UEFI firmware, which is called OVMF, to boot our kernel image from disk.
+this is a topic that can get very complicated, but fortunately for our purposes there are only four major concepts we need to understand:
+
+the UEFI boot manager
+this is the program, included in implementations of UEFI, that is responsible for (among other things) loading UEFI applications.
+the boot manager is programmable via variables which are written to an NVRAM chip on your motherboard (similar to the older CMOS chip and battery system it replaced).
+"boot options" are a type of NVRAM variable which contain a pointer to a hardware device and to a file on that device, which is the UEFI application to be loaded.
 
 UEFI applications
-these are just programs that have been written in a particular way, such that they can be executed by UEFI firmware.
+these are just programs that have been written in a particular way, such that they can be loaded by the boot manager.
 boot loaders are an example of the sort of program that would be written in this way; much like how a linux kernel runs and hands off control to `init`, UEFI can execute a boot loader program, which will then handle starting your OS.
 
-EFI system partition
+GUID partition tables
+GPT is a standard for the layout of partition tables, and all compliant UEFI firmware is required to be able to understand it.
+as UEFI replaced BIOS, GPT replaced MBR-based partitioning schemes.
 
-GUID partition table
+EFI system partitions
+an ESP is a FAT-formatted partition given a specific GPT partition type, and again, all compliant UEFI firmware is required to be able to read it.
 
-UEFI boot manager
-this is the program, included in implementations of UEFI, that is responsible for (among other things) loading UEFI applications.
-the boot manager is configurable via "boot options", which describe on what partition and at what filepath UEFI applications can be found.
-
-we now know what we need to do: create a new GPT-partitioned disk image, create a FAT-formatted EFI system partition on the disk, write a UEFI application that will boot our linux image, copy it to the ESP, write a boot option describing the location of the application and provide it to the OVMF boot manager.
+if you are interested and want more details about any of this, i highly recommend going straight to the [UEFI specification](https://uefi.org/specs/UEFI/2.10/index.html), because sadly the web is full of misinformation about UEFI.
+but with the information we have now, we can piece together what is required: we must create a new GPT-partitioned disk image, create an EFI system partition on the disk, write a UEFI application that will boot our linux image, copy it to the ESP, write a boot option describing the location of the application and write it to NVRAM.
 needless to say, this is quite a lot of work.
 
 --- create efi structure
@@ -169,76 +180,120 @@ virt-make-fs --format=qcow2 --type=fat rootfs rootfs.fat.qcow2
 
 so let's cheat.
 in the absence of any valid boot option, the boot manager will enumerate all devices and attempt to boot from each, using the default path `\EFI\BOOT\BOOT[machine type short-name].EFI`
-the UEFI specification [states](https://uefi.org/specs/UEFI/2.10/02_Overview.html): "An UEFI-defined System Partition is required by UEFI to boot from a block device"
+the specification [states](https://uefi.org/specs/UEFI/2.10/02_Overview.html#overview): "An UEFI-defined System Partition is required by UEFI to boot from a block device"
 happily for us, however, OVMF will find and execute `BOOTx64.EFI` on any FAT filesystem - it does not require the image to be on an ESP, nor even that the filesystem be partitioned at all.
 we'll take advantage of that fact and skip creating an ESP for now - it will be covered in detail in the next article in this series.
 
 you might be surprised to see that we can just rename our kernel image and have UEFI boot it - does this mean that linux is a UEFI application?
 if compiled with the configuration option CONFIG_EFI_STUB enabled, yes; this is called the [EFI Boot Stub](https://docs.kernel.org/admin-guide/efi-stub.html) and it has saved us a great deal of effort.
 
-as complex as this seemed at first, in practice all we've needed to do is rename our kernel image and store it in a particular location on a FAT formatted disk image.
+as complex as this seemed at first, in practice all we've needed to do is rename our kernel image and store it in a particular location on a FAT formatted disk.
 now we can boot it:
 
 --- stage3 boot
 qemu-system-x86_64 -m 512M -bios /usr/share/qemu/OVMF.fd -hda rootfs.fat.qcow2
 ---
 
-attentive readers will have already spotted the problem.
+of course, this does not work; attentive readers will have already spotted the problem.
 
 @s stage4 - creating an initramfs
-now that qemu is no longer booting our kernel for us, it can't pass along the required boot parameter.
-the uefi firmware is able to find and boot our kernel image from the disk we provided, but we are again seeing a panic because the kernel doesn't know on what device to find the root filesystem.
-we have a few options to fix this, but instead we will take this opportunity to introduce another method by which linux can boot: initramfs.
+now that qemu is no longer booting our kernel for us, it can't pass along the required boot parameter `root=`.
+OVMF is able to find and boot our kernel image from the disk we provided, but we are again seeing a panic because the kernel doesn't know on what device to find the root filesystem.
+we have a few options to fix this, but first we will take this opportunity to introduce another method by which linux can boot: initramfs.
+
+`root=` has some serious limitations, which led to the development of alternative solutions, including initramfs.
+for instance, what if our root filesystem is encrypted, or located on a network share?
+the kernel can't be expected to know how to handle complex cases like these.
+an initramfs image is a compressed archive of a particular format, which the linux kernel extracts into a small RAM-based root filesystem called, funnily enough, rootfs.
+it can be loaded at runtime, or bundled in to the kernel at compile time.
+after extracting, the kernel checks this filesystem for an `init` program and if found, dutifully runs it for us.
+from that point on, the kernel is absolved of responsibility, and it is the job of `init` to get the real system up and running.
+
+for more information, the [kernel documentation](https://www.kernel.org/doc/html/latest/filesystems/ramfs-rootfs-initramfs.html?highlight=initramfs) is the best resource.
 
 --- create initramfs
 mkdir --parents initramfs/EFI/BOOT
 cp rootfs/EFI/BOOT/BOOTx64.EFI initramfs/EFI/BOOT/vmlinuz.EFI
+---
+
+first we'll create a new directory for our initramfs, and copy the kernel image from our rootfs into it.
+we need to rename it because we no longer want OVMF to boot it for us.
+
+--- create initramfs +=
 (
 cd rootfs/sbin
 echo init | cpio --quiet --create --format=newc | gzip > ../../initramfs/initramfs_data.cpio.gz
 )
 ---
 
-we'll create a new directory for our initramfs, and give it that same structure that UEFI expects.
-cpio reads a list of filenames from stdin and creates an archive containing them.
-we then compress the archive with gzip and put it in the initramfs directory.
+the 'particular format' required for an initramfs we mentioned earlier is an SVR4 cpio archive, compressed with gzip.
+gzip is a very common compression format that you have likely come across before, but cpio is rather more esoteric.
+the `cpio` tool creates archives from a list of filenames; as we only wish to copy `init` to our initramfs, that is the only name we provide.
+`--format=newc` ensures we create an SVR4 archive; by default, `cpio` uses an obsolete binary format.
+the archive is then piped to `gzip`, which compresses it and writes it out to the initramfs directory.
+
+having created an initramfs image, we need to provide it to our kernel somehow.
+bundling it in at build time is a little involved, so we will come to it later, and for now let's see how the kernel can load an initramfs image at runtime.
 
 --- create initramfs +=
-cat << EOF > initramfs/startup.nsh
-vmlinuz.efi initrd=initramfs_data.cpio.gz
+cat > initramfs/startup.nsh << EOF 
+vmlinuz.EFI initrd=initramfs_data.cpio.gz
 EOF
 virt-make-fs --format=qcow2 --type=fat initramfs initramfs.fat.qcow2
 ---
 
-unfortunately, we still need to pass a parameter to the kernel, this time to tell it where the initramfs file is.
-we can do this from the UEFI firmware shell, but having to do that manually on every boot would be inconvenient.
-we needn't bother partitioning our disk, as our UEFI firmware will look for bootx64.efi on any FAT filesystem.
+the kernel parameter `initrd=` is used to specify the location of the initramfs image, and to actually pass it to the kernel, we will make use of the UEFI shell.
+UEFI firmware provides a shell environment (with a [specification](https://uefi.org/sites/default/files/resources/UEFI_Shell_2_2.pdf) of its own) which can be used for tasks like launching UEFI applications and modifying NVRAM variables.
+we can run `vmlinuz.EFI` from the shell ourselves, but having to do that manually at every boot would be inconvenient - luckily we don't have to.
+OVMF drops into the shell when it fails to boot, and when the shell initializes, it tries to run a special script called `startup.nsh`.
+we create that script file, and inside it we provide the name of the application we want to execute and its arguments.
 
 --- stage4 boot
 qemu-system-x86_64 -m 512M -bios /usr/share/qemu/OVMF.fd -hda initramfs.fat.qcow2 -net none
 ---
 
-this works, but it is a bit of a hack. we should not be relying on startup.nsh to pass kernel parameters on boot.
-we use `-net none` here just because the UEFI firmware will attempt a network boot, and we don't want to have to wait for that to time out. 
+(we use `-net none` here because without it OVMF will attempt a network boot, and we don't want to have to wait for that to time out.)
+this works, but it is a bit of a hack, and slows our boot time considerably.
+so let us explore the second, more fun approach to loading our initramfs image - building it into the kernel!
 
 
 @s stage5 - building a custom kernel
-its time now to build our own kernel, into which we can embed our initramfs.
 
-clone the linux kernel git repository
+perhaps compiling your own kernel seems daunting, but really it is very simple, and to know how it is done is a useful skill to have.
+
+let's grab the kernel source code.
+we use `--depth 1` to create a shallow clone, pulling only the latest commit and not the entire history.
 --- build kernel
 git clone --depth 1 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 ---
-we use `--depth 1` to create a shallow clone, pulling only the latest commit and not the entire history
+
+there are several ways we can bundle our initramfs into the kernel.
+for us, the simplest option would be to provide the kernel with the filepath to our image - we've already prepared it in the correct format, so we can have the build process unpack it directly.
+if we hadn't already packaged our files up, the kernel build can do it for us if we provide it with a target directory, which is convenient.
+however the most powerful method is to use a configuration file, so that is what we shall do.
 
 --- build kernel +=
 cp rootfs/sbin/init linux/usr/
-cat << EOF > linux/usr/initramfs_list
+cat > linux/usr/initramfs_list << EOF 
 dir /dev 0755 0 0
 nod /dev/console 0600 0 0 c 5 1
 file /init usr/init 500 0 0
 EOF
+---
 
+we first copy our init program to a location accessible by the build process, and then we create initramfs_list.
+this configuration file describes what the contents of the initramfs should be, and the `usr/gen_init_cpio.c` program makes it so.
+to explain each line in turn:
+
+`dir /dev 0755 0 0` creates the directory `/dev`, and the numbers following are its mode (access permissions and special mode flags).
+`nod /dev/console 0600 0 0 c 5 1` creates the device node `/dev/console` with the given mode.
+`c 5 1` identifies the device node
+`file /init usr/init 500 0 0` creates the file `/init` from the local file `usr/init` with the given mode.
+
+the reason we now have to create `/dev/console` is that when we were providing an external initramfs image, it was appended to the kernel's default one (found at `linux/usr/default_cpio_list`) which included it for us.
+when we bundle the image in at build time, it overwrites the default, and without `/dev/console` we get no output when we boot our system.
+
+--- build kernel +=
 (
 cd linux
 make mrproper
@@ -246,115 +301,156 @@ make defconfig
 scripts/config --set-str CONFIG_INITRAMFS_SOURCE usr/initramfs_list
 scripts/config --enable CONFIG_CMDLINE_BOOL
 scripts/config --set-str CONFIG_CMDLINE console=ttyS0
-scripts/config --enable CONFIG_DRM_BOCHS
 make olddefconfig
 make -j "$(nproc)" --quiet
 )
+---
 
+there are really only two stages to building the linux kernel - configuration and compilation.
+to customise our kernel, we need to modify a file called `.config` which contains a list of kernel configuration options.
+we will use the `scripts/config` utility to do this, because it allows for non-interactive configuration of kernel build options from the command line, instead of the usual menu-based methods.
+we then use the build tool `make` to compile the kernel with the options we have specified.
+`make mrproper` cleans up the build environment, and `make defconfig` sets the default options in `.config`.
+`CONFIG_INITRAMFS_SOURCE` tells the kernel from where it can load an initramfs image, and we point it at the configuration file we created; however, this could also be set to an initramfs image or to a directory, as described previously.
+when enabled, `CONFIG_CMDLINE_BOOL` allows us to set `CONFIG_CMDLINE`, which we use to pass runtime parameters to the kernel.
+`make olddefconfig` updates our `.config` file with the new values we have set, and also sets any new options to their default value rather than prompting the user to decide what to do.
+the final `make` is what actually kicks off the kernel build process, and `-j "$(nproc)"` allows it to use all of our CPU cores for faster compilation.
+
+exercise for the reader: use `make allnoconfig` instead of `make defconfig` to clear your `.config` of all kernel configuration options, and then set the bare minimum number of kernel options required to boot.
+note: i intended to do this myself for this post, but i could not get it working. if you manage to figure it out, please do let me know!
+
+--- build kernel +=
 cp linux/arch/x86/boot/bzImage initramfs/EFI/BOOT/BOOTx64.EFI
 virt-make-fs --format=qcow2 --type=fat initramfs initramfs.fat.qcow2
 ---
-make olddefconfig updates our config with the new values we set, and also sets new symbols to their default value without prompting
+
+the output of the build process (i.e. the kernel), is written to `linux/arch/x86/boot/bzImage`; we copy it to our initramfs directory and rebuild our disk image.
 
 --- stage5 boot
 qemu-system-x86_64 -m 512M -bios /usr/share/qemu/OVMF.fd -hda initramfs.fat.qcow2 -nographic
 ---
 
-we now have to use `-nographic` because our custom linux kernel has not been built with support for graphics.
+we now have to use `-nographic` because our custom linux kernel has not been built with support for graphics.)
 we are now successfully booting linux from disk via UEFI and running our custom init program from an initramfs!
-exercise for the reader: make the output visible without -nographic
 
 @s stage6 - busybox
-it's about time we set aside our example init program and installed something more useful. a great option for a minimal init is busybox. download a static binary from busybox.net
 
---- busybox initramfs
-(
-cd linux
-mkdir -p usr/initramfs_data/bin
-cp ~/Downloads/busybox usr/initramfs_data/bin/
-chmod +x usr/initramfs_data/bin/busybox
+it's about time we set aside our example init program and booted something more useful.
+a great option for a minimal init program is [busybox](https://busybox.net/about.html).
 
-cat << EOF > usr/initramfs_data/init
-#!/bin/busybox sh
-/bin/busybox --install -s /bin/
-exec sh
-EOF
-chmod +x usr/initramfs_data/init
-
-cat << EOF > usr/initramfs_list
+--- busybox initramfs ---
+cat > linux/usr/initramfs_list << EOF
 dir /dev 0755 0 0
 nod /dev/console 0600 0 0 c 5 1
-dir /bin 755 1000 1000
-file /bin/busybox usr/initramfs_data/bin/busybox 755 0 0
-slink /bin/sh busybox 777 0 0
-file /init usr/initramfs_data/init 500 0 0
+dir /bin 755 0 0
+file /bin/busybox usr/busybox 755 0 0
+file /init usr/init 500 0 0
 EOF
+---
+
+we recognise most of this, but this time we are also creating a `/bin` directory in which we put `busybox`.
+
+--- busybox initramfs --- +=
+(
+cd linux/usr
+wget https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
+chmod +x busybox
+
+cat > init << EOF
+#!/bin/busybox sh
+/bin/busybox --install /bin
+exec sh
+EOF
+chmod +x init
+)
+---
+
+we fetch a `busybox` binary from the website, make it executable, and then create a new init file that utilizes it.
+the first line is important - the kernel sees `#!` (called the 'shebang') and knows that what comes next is a command which can interpret the remainder of the file.
+then, `/bin/busybox --install /bin` creates hard links to `/bin/busybox` for every 'applet' in the `/bin` directory.
+one such link is `/bin/sh`, which we make immediate use of: the next, and final, action of our init script is to run `exec sh`.
+`exec` replaces the current process with the new process spawned by running the given command, which is why it comes at the end - nothing written after `exec` would be run.
+while not strictly necessary in our toy case (if we directly ran `sh` it would be spawned as a child process; on exit it would return to the parent process, which would find no further commands to run and would itself exit) it is best practice, so better to get used to it now.
+
+--- busybox initramfs --- +=
+(
+cd linux
 make -j "$(nproc)"
 )
-
 cp linux/arch/x86/boot/bzImage initramfs/EFI/BOOT/BOOTx64.EFI
 virt-make-fs --format=qcow2 --type=fat initramfs initramfs.fat.qcow2
 ---
+
+we now rebuild our kernel to use the new initramfs configuration file, copy the resulting image to the initramfs directory, and create a new disk image from it.
 
 --- stage6 boot
 qemu-system-x86_64 -m 512M -bios /usr/share/qemu/OVMF.fd -hda initramfs.fat.qcow2 -nographic
 ---
 
 now we finally have a useful system.
-exercise for the reader: create a bootable usb
+feel free to play around with `busybox` and its 'applets' before continuing - it's not uncommon to find in the wild, especially on things like rescue disks and containers, so it would not be a bad use of your time to become familiar with it.
+exercise for the reader: using what you have learned so far, can you create a bootable usb with this custom kernel and run it on your hardware?
+answers on a postcard, please.
 
-@ stage7 - switch_root
+@s stage7 - switch_root
+
+at this point you may wonder what's left to do - we've booted a custom linux kernel image from disk using UEFI, and we get a shell with a suite of useful applications available.
+remember that we are still just running the initramfs, whose job is to boot up the real OS on the root filesystem.
+we could certainly try building a root filesystem for a "real" linux system and have our initramfs load it, but that starts to encroach on Linux From Scratch's territory, so isn't really appropriate for this primer.
+lucky for us then that we already have a rootfs disk image ready to go.
 
 --- exec switch_root
-(
-cd linux
-
-cat << EOF > usr/initramfs_data/init
-#!/bin/busybox sh
-/bin/busybox --install -s /bin/
-mount -t proc proc /proc
-mount -t sysfs sysfs /sys
-mdev -s
-mount /dev/sdb /mnt
-exec switch_root /mnt /sbin/init
-EOF
-chmod +x usr/initramfs_data/init
-
-cat << EOF > usr/initramfs_list
+cat > linux/usr/initramfs_list << EOF
 dir /proc 755 0 0
 dir /sys 755 0 0
 dir /mnt 755 0 0
 dir /dev 0755 0 0
 nod /dev/console 0600 0 0 c 5 1
 dir /bin 755 1000 1000
-file /bin/busybox usr/initramfs_data/bin/busybox 755 0 0
-slink /bin/sh busybox 777 0 0
-file /init usr/initramfs_data/init 500 0 0
+file /bin/busybox usr/busybox 755 0 0
+file /init usr/init 500 0 0
 EOF
+---
+
+new here are the directories `/proc`, `/sys` and `/mnt`.
+
+--- exec switch_root --- +=
+(
+cd linux/usr
+cat > init << EOF
+#!/bin/busybox sh
+/bin/busybox --install /bin
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mdev -s
+mount /dev/sdb /mnt
+exec switch_root /mnt /sbin/init
+EOF
+chmod +x init
+)
+---
+
+the key change here is that rather than having `init` execute `sh` as its final step, we run a program called `switch_root`.
+this changes our root directory to `/mnt`, discards the initramfs (freeing the memory it had been using), and executes `/sbin/init`
+
+--- exec switch_root --- +=
+(
+cd linux
 make -j "$(nproc)"
 )
 cp linux/arch/x86/boot/bzImage initramfs/EFI/BOOT/BOOTx64.EFI
 virt-make-fs --format=qcow2 --type=fat initramfs initramfs.fat.qcow2
-virt-make-fs --format=qcow2 --type=ext2 rootfs rootfs.ext2.qcow2
 ---
+
+and we boot for the final time:
 
 --- stage7 boot
 qemu-system-x86_64 -m 512M -bios /usr/share/qemu/OVMF.fd -hda initramfs.fat.qcow2 -hdb rootfs.ext2.qcow2 -nographic
 ---
 
-exercise for the reader: create one disk with two partitions containing our initramfs and rootfs respectively.
+exercise for the reader: create one disk image containing both our initramfs and rootfs and get it running.
 
-now we are ready to begin Linux From Scratch!
-
-
-
-
-
-write more detailed explanations
-https://www.landley.net/writing/rootfs-intro.html
-https://www.happyassassin.net/posts/2014/01/25/uefi-boot-how-does-that-actually-work-then/
-https://superuser.com/questions/1657478/how-make-a-bootable-iso-for-my-uefi-application-bare-bones
-https://stackoverflow.com/questions/57389189/create-pure-uefi-bootable-iso-from-directory
+that's as far as this primer can take you.
 
 --- LFSp.sh --- noWeave
 #!/bin/bash
@@ -373,10 +469,9 @@ log info "Preparing environment..."
 @{setup}
 
 log info "Building stage0"
-log debug "test"
 (
 mkdir stage0 && cd "$_"
-cat << EOF > boot.sh
+cat > boot.sh << EOF
 @{stage0 boot}
 EOF
 chmod +x boot.sh
@@ -387,7 +482,7 @@ log info "Building stage1"
 mkdir stage1 && cd "$_"
 
 @{create rootfs}
-cat << EOF > boot.sh
+cat > boot.sh << EOF
 @{stage1 boot}
 EOF
 chmod +x boot.sh
@@ -398,7 +493,7 @@ log info "Building stage2"
 cp -r stage1 stage2 && cd "$_"
 
 @{create simple init}
-cat << EOF > boot.sh
+cat > boot.sh << EOF
 @{stage2 boot}
 EOF
 chmod +x boot.sh
@@ -409,7 +504,7 @@ log info "Building stage3"
 cp -r stage2 stage3 && cd "$_"
 
 @{create efi structure}
-cat << EOF > boot.sh
+cat > boot.sh << EOF
 @{stage3 boot}
 EOF
 chmod +x boot.sh
@@ -420,7 +515,7 @@ log info "Building stage4"
 cp -r stage3 stage4 && cd "$_"
 
 @{create initramfs}
-cat << EOF > boot.sh
+cat > boot.sh << EOF
 @{stage4 boot}
 EOF
 chmod +x boot.sh
@@ -432,7 +527,7 @@ log info "Building stage5"
 cp -r stage4 ${final_stage} && cd "$_"
 
 @{build kernel}
-cat << EOF > boot.sh
+cat > boot.sh << EOF
 @{stage5 boot}
 EOF
 chmod +x boot.sh
@@ -444,7 +539,7 @@ log info "Building stage6"
 cd ${final_stage}
 
 @{busybox initramfs}
-cat << EOF > boot.sh
+cat > boot.sh << EOF
 @{stage6 boot}
 EOF
 chmod +x boot.sh
@@ -456,7 +551,7 @@ log info "Building stage7"
 cd stage7
 
 @{exec switch_root}
-cat << EOF > boot.sh
+cat > boot.sh << EOF
 @{stage7 boot}
 EOF
 chmod +x boot.sh
@@ -473,6 +568,7 @@ chmod +x boot.sh
 #scripts/config --disable INITRAMFS_COMPRESSION_ZSTD
 #scripts/config --disable INITRAMFS_COMPRESSION_NONE
 #scripts/config --disable CMDLINE_OVERRIDE
+#scripts/config --enable CONFIG_DRM_BOCHS
 ---
 
 --- bashlog --- noWeave
@@ -608,3 +704,12 @@ function log() {
 #  && log debug 'DEBUG trap set' \
 #  || log error 'DEBUG trap failed to set';
 ---
+
+<style>
+.codeblock_name {
+    display: none;
+}
+.seealso {
+    display: none;
+}
+</style>
