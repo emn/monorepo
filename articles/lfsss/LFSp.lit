@@ -259,7 +259,7 @@ so let us explore the second, more fun approach to loading our initramfs image -
 
 @s stage5 - building a custom kernel
 
-perhaps compiling your own kernel seems daunting, but really it is very simple, and to know how it is done is a useful skill to have.
+perhaps compiling your own kernel seems daunting, but really it is very simple, and to know how to do it for yourself is a useful skill.
 
 let's grab the kernel source code.
 we use `--depth 1` to create a shallow clone, pulling only the latest commit and not the entire history.
@@ -286,8 +286,7 @@ this configuration file describes what the contents of the initramfs should be, 
 to explain each line in turn:
 
 `dir /dev 0755 0 0` creates the directory `/dev`, and the numbers following are its mode (access permissions and special mode flags).
-`nod /dev/console 0600 0 0 c 5 1` creates the device node `/dev/console` with the given mode.
-`c 5 1` identifies the device node
+`nod /dev/console 0600 0 0 c 5 1` creates the device node `/dev/console` with the given mode, where `c 5 1` identifies the device; see `linux/Documentation/admin-guide/devices.txt` for more information.
 `file /init usr/init 500 0 0` creates the file `/init` from the local file `usr/init` with the given mode.
 
 the reason we now have to create `/dev/console` is that when we were providing an external initramfs image, it was appended to the kernel's default one (found at `linux/usr/default_cpio_list`) which included it for us.
@@ -330,7 +329,7 @@ the output of the build process (i.e. the kernel), is written to `linux/arch/x86
 qemu-system-x86_64 -m 512M -bios /usr/share/qemu/OVMF.fd -hda initramfs.fat.qcow2 -nographic
 ---
 
-we now have to use `-nographic` because our custom linux kernel has not been built with support for graphics.)
+(we now have to use `-nographic` because our custom linux kernel has not been built with support for graphics.)
 we are now successfully booting linux from disk via UEFI and running our custom init program from an initramfs!
 
 @s stage6 - busybox
@@ -403,16 +402,16 @@ lucky for us then that we already have a rootfs disk image ready to go.
 cat > linux/usr/initramfs_list << EOF
 dir /proc 755 0 0
 dir /sys 755 0 0
-dir /mnt 755 0 0
 dir /dev 0755 0 0
 nod /dev/console 0600 0 0 c 5 1
+nod /dev/sdb 0600 0 0 b 8 16
 dir /bin 755 1000 1000
 file /bin/busybox usr/busybox 755 0 0
 file /init usr/init 500 0 0
 EOF
 ---
 
-new here are the directories `/proc`, `/sys` and `/mnt`.
+new here are the directories `/proc` and `/sys`, which are required in order to mount `/dev/sdb`, the major and minor numbers of which we used the previously mentioned `devices.txt` to find.
 
 --- exec switch_root --- +=
 (
@@ -422,7 +421,7 @@ cat > init << EOF
 /bin/busybox --install /bin
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
-mdev -s
+mkdir /mnt
 mount /dev/sdb /mnt
 exec switch_root /mnt /sbin/init
 EOF
@@ -430,6 +429,7 @@ chmod +x init
 )
 ---
 
+to access `/dev/sdb` we need to mount it; we create a directory `/mnt` to use as a mount point.
 the key change here is that rather than having `init` execute `sh` as its final step, we run a program called `switch_root`.
 this changes our root directory to `/mnt`, discards the initramfs (freeing the memory it had been using), and executes `/sbin/init`
 
@@ -450,7 +450,8 @@ qemu-system-x86_64 -m 512M -bios /usr/share/qemu/OVMF.fd -hda initramfs.fat.qcow
 
 exercise for the reader: create one disk image containing both our initramfs and rootfs and get it running.
 
-that's as far as this primer can take you.
+that's as far as this primer can take you - i hope that it was of some use.
+those so inclined can continue to part 2 in the series, <a href=LFSc.html>LFS: a companion</a>
 
 --- LFSp.sh --- noWeave
 #!/bin/bash
@@ -568,7 +569,6 @@ chmod +x boot.sh
 #scripts/config --disable INITRAMFS_COMPRESSION_ZSTD
 #scripts/config --disable INITRAMFS_COMPRESSION_NONE
 #scripts/config --disable CMDLINE_OVERRIDE
-#scripts/config --enable CONFIG_DRM_BOCHS
 ---
 
 --- bashlog --- noWeave
