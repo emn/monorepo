@@ -1,0 +1,64 @@
+::-moz-selection {
+    background: rgb(255, 247, 162);
+}
+::selection {
+    background: rgb(255, 247, 162);
+}
+
+body {
+    background-color: rgb(255, 254, 242);
+    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 1.2rem;
+}
+a:link, a:visited {
+    color: rgb(247, 170, 28);
+}
+a:visited:hover,a:visited:not(.lit):hover, a:link:hover,a:link:not(.lit):hover {
+    text-decoration: underline;
+    color: rgb(248, 148, 18);
+}
+p {
+    line-height: 1.5;
+    padding: 0.65rem 0
+}
+h1 {
+    text-align: left;
+    font-size: 2.25em;
+    font-weight: 400;
+}
+h4 {
+    font-size: 1.45em;
+    font-weight: 400;
+}
+pre {
+    text-wrap: wrap;
+    background-color: #ecefef;
+    padding: 0.45rem 0.8rem;
+    -moz-tab-size: 2;
+    tab-size: 2;
+    overflow-x: auto;
+    word-break: keep-all;
+    border-radius: 0.2rem;
+    box-shadow: 1px 1px 4px #d5d9d9;
+    margin-bottom: 0.9rem;
+}
+pre.prettyprint {
+    background-color: #f4f7f7;
+    padding: 0.45rem 0.8rem;
+    -moz-tab-size: 2;
+    tab-size: 2;
+    overflow-x: auto;
+    word-break: keep-all;
+    border-radius: 0.2rem;
+    box-shadow: 1px 1px 4px #d5d9d9;
+    margin-bottom: 0.9rem;
+}
+p:not(.notp) {
+    text-indent: 0;
+}
+code {
+    color: #b36f0a;
+    font-size: 1.05em;
+}
