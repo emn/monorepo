@@ -1,30 +1,36 @@
 ::-moz-selection {
-    background: rgb(255, 247, 162);
-}
+    /*background: rgb(255, 247, 162);   */
+    background: #F83;
+} 
 ::selection {
-    background: rgb(255, 247, 162);
+    /*background: rgb(255, 247, 162);*/
+    background: #F83;
 }
-
 body {
-    background-color: rgb(255, 254, 242);
+    background-color: #FFF1E5;
+    color: #333;
+    /*background-color: rgb(255, 254, 242);*/
     /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: 1.2rem;
 }
 a:link, a:visited {
-    color: rgb(247, 170, 28);
+    /*color: rgb(247, 170, 28);*/
+    color: #0D7680;
+    text-decoration: none;
 }
 a:visited:hover,a:visited:not(.lit):hover, a:link:hover,a:link:not(.lit):hover {
-    text-decoration: underline;
-    color: rgb(248, 148, 18);
+    /*text-decoration: underline;*/
+    /*color: rgb(248, 148, 18);*/
+    color: #0F5499;
 }
 p {
     line-height: 1.5;
     padding: 0.65rem 0
 }
 h1 {
-    text-align: left;
+    text-align: center;
     font-size: 2.25em;
     font-weight: 400;
 }
@@ -34,7 +40,8 @@ h4 {
 }
 pre {
     text-wrap: wrap;
-    background-color: #ecefef;
+    /*background-color: #ecefef;*/
+    background-color: #FFF4EA;
     padding: 0.45rem 0.8rem;
     -moz-tab-size: 2;
     tab-size: 2;
@@ -43,9 +50,14 @@ pre {
     border-radius: 0.2rem;
     box-shadow: 1px 1px 4px #d5d9d9;
     margin-bottom: 0.9rem;
+    font-size: 0.85rem;
+    border: 1px solid #F2DFCE;
+    width: fit-content;
 }
 pre.prettyprint {
-    background-color: #f4f7f7;
+    /*background-color: #f4f7f7;*/
+    background-color: #FFF4EA;
+    color: black;
     padding: 0.45rem 0.8rem;
     -moz-tab-size: 2;
     tab-size: 2;
@@ -54,11 +66,20 @@ pre.prettyprint {
     border-radius: 0.2rem;
     box-shadow: 1px 1px 4px #d5d9d9;
     margin-bottom: 0.9rem;
+    border: 1px solid #F2DFCE;
 }
 p:not(.notp) {
     text-indent: 0;
 }
 code {
-    color: #b36f0a;
-    font-size: 1.05em;
+    /*color: #b36f0a;*/
+    color: #990F3D;
+    font-size: 0.8em;
+    font-family: 'Courier New', monospace;
+}
+.codeblock_name {
+    display: none;
+}
+.seealso {
+    display: none;
 }
