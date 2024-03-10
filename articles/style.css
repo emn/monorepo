@@ -1,5 +1,5 @@
 ::-moz-selection {
-    /*background: rgb(255, 247, 162);   */
+    /*background: rgb(255, 247, 162);*/
     background: #F83;
 } 
 ::selection {
@@ -53,6 +53,7 @@ pre {
     font-size: 0.85rem;
     border: 1px solid #F2DFCE;
     width: fit-content;
+    font-family: 'Courier New', monospace;
 }
 pre.prettyprint {
     /*background-color: #f4f7f7;*/
